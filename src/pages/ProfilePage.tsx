@@ -5,7 +5,7 @@ import { Header } from "@/components/Header";
 import { BusinessCard } from "@/components/BusinessCard";
 import { StatusItem } from "@/components/StatusItem";
 import { companyProfiles, statusUpdates } from "@/data/mockData";
-import { ArrowLeft, BookOpen } from "lucide-react";
+import { ArrowLeft, BookOpen, Grid3X3 } from "lucide-react";
 
 const ProfilePage = () => {
   const { id } = useParams<{ id: string }>();
@@ -43,10 +43,15 @@ const ProfilePage = () => {
       <Header />
       
       <main className="flex-1 container mx-auto px-4 py-6 max-w-2xl">
-        <div className="mb-6">
+        <div className="mb-6 flex">
           <Link to="/" className="flex items-center text-whatsapp-green font-medium">
             <ArrowLeft className="w-4 h-4 mr-1" />
             Back to Profiles
+          </Link>
+          
+          <Link to="/companies" className="flex items-center text-whatsapp-green font-medium ml-4">
+            <Grid3X3 className="w-4 h-4 mr-1" />
+            Grid View
           </Link>
         </div>
         

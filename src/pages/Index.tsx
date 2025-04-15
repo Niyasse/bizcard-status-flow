@@ -3,7 +3,7 @@ import { Header } from "@/components/Header";
 import { ProfileList } from "@/components/ProfileList";
 import { companyProfiles } from "@/data/mockData";
 import { Link } from "react-router-dom";
-import { Plus, BookOpen } from "lucide-react";
+import { Plus, BookOpen, Grid3X3 } from "lucide-react";
 
 const Index = () => {
   return (
@@ -20,6 +20,13 @@ const Index = () => {
             >
               <BookOpen className="w-4 h-4 mr-1" />
               Status Updates
+            </Link>
+            <Link 
+              to="/companies" 
+              className="px-3 py-1.5 text-sm font-medium rounded-md bg-white shadow-sm border border-gray-200 text-gray-700 flex items-center"
+            >
+              <Grid3X3 className="w-4 h-4 mr-1" />
+              Grid View
             </Link>
             <Link 
               to="/create-profile" 
