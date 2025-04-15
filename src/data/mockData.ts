@@ -14,6 +14,7 @@ export const companyProfiles = [
     address: "123 Business Ave, Suite 101, New York, NY 10001",
     lastUpdated: "10:30 AM",
     hasNewStatus: true,
+    tags: ["Tech", "Innovation"],
     social: {
       facebook: "https://facebook.com",
       twitter: "https://twitter.com",
@@ -33,6 +34,7 @@ export const companyProfiles = [
     address: "456 Tech Blvd, San Francisco, CA 94107",
     lastUpdated: "Yesterday",
     hasNewStatus: true,
+    tags: ["Tech", "Innovation", "Software"],
     social: {
       twitter: "https://twitter.com",
       linkedin: "https://linkedin.com"
@@ -50,6 +52,7 @@ export const companyProfiles = [
     address: "789 Green St, Portland, OR 97201",
     lastUpdated: "2 days ago",
     hasNewStatus: false,
+    tags: ["Retail", "Green", "Logistics"],
     template: "minimal"
   },
   {
@@ -63,6 +66,7 @@ export const companyProfiles = [
     address: "1010 Design District, Miami, FL 33137",
     lastUpdated: "2 days ago",
     hasNewStatus: true,
+    tags: ["Design", "Creative"],
     social: {
       instagram: "https://instagram.com",
       linkedin: "https://linkedin.com"
@@ -80,6 +84,7 @@ export const companyProfiles = [
     address: "2020 Delivery Lane, Chicago, IL 60607",
     lastUpdated: "1 week ago",
     hasNewStatus: false,
+    tags: ["Logistics", "Transport"],
     template: "bold"
   }
 ];
