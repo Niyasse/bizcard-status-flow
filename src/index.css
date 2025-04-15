@@ -96,6 +96,89 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-whatsapp-light text-whatsapp-text;
   }
+}
+
+/* Card flip animation */
+@layer components {
+  .card-container {
+    perspective: 1000px;
+    width: 100%;
+    height: 100%;
+  }
+
+  .card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+  }
+
+  .card-flip {
+    transform: rotateY(180deg);
+  }
+
+  .card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    border-radius: 0.75rem;
+  }
+
+  .card-front {
+    background-color: theme('colors.whatsapp.cardFront');
+    color: theme('colors.whatsapp.text');
+  }
+
+  .card-back {
+    background-color: theme('colors.whatsapp.cardBack');
+    color: theme('colors.whatsapp.text');
+    transform: rotateY(180deg);
+  }
+}
+
+/* Status circle animation */
+@layer components {
+  .status-ring {
+    @apply relative rounded-full;
+  }
+  
+  .status-ring::before {
+    content: '';
+    @apply absolute inset-0 rounded-full;
+    background: conic-gradient(
+      theme('colors.whatsapp.green'),
+      theme('colors.whatsapp.lightGreen'),
+      theme('colors.whatsapp.blue'),
+      theme('colors.whatsapp.green')
+    );
+    padding: 2px;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+}
+
+/* WhatsApp inspired animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.slide-in {
+  animation: slideIn 0.4s ease-out;
 }
