@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Phone, MessageCircle, Share2, ExternalLink, Mail, MapPin } from "lucide-react";
+import { Phone, MessageCircle, Share2, ExternalLink, Mail, MapPin, QrCode } from "lucide-react";
 
 export interface BusinessCardProps {
   id: string;
@@ -44,8 +44,14 @@ export function BusinessCard({
         url: window.location.href,
       });
     } else {
-      // Fallback for browsers that don't support the Web Share API
       alert(`Share ${name}'s business card: ${window.location.href}`);
+    }
+  };
+
+  const handleGoogleMaps = () => {
+    if (address) {
+      const encodedAddress = encodeURIComponent(address);
+      window.open(`https://maps.google.com/?q=${encodedAddress}`, '_blank');
     }
   };
 
@@ -90,20 +96,23 @@ export function BusinessCard({
             <div className="w-16 h-16 rounded-full overflow-hidden mr-4 border-2 border-white bg-white flex-shrink-0">
               <img src={logo} alt={`${name} logo`} className="w-full h-full object-contain" />
             </div>
-            <div>
+            <div className="flex-1">
               <h2 className="text-xl font-bold">{name}</h2>
               <p className="text-sm opacity-90">{tagline}</p>
+            </div>
+            <div className="ml-2">
+              <QrCode className="w-8 h-8 opacity-70" />
             </div>
           </div>
           
           <div className="flex-grow">
             <div className="flex items-center mb-2">
               <Phone className="w-4 h-4 mr-2 opacity-70" />
-              <span>{phone}</span>
+              <span className="text-sm">{phone}</span>
             </div>
             <div className="flex items-center">
               <Mail className="w-4 h-4 mr-2 opacity-70" />
-              <span>{email}</span>
+              <span className="text-sm">{email}</span>
             </div>
           </div>
           
@@ -141,9 +150,17 @@ export function BusinessCard({
           )}
           
           {address && (
-            <div className="flex items-start mb-3">
-              <MapPin className="w-4 h-4 mr-2 mt-0.5 opacity-70" />
-              <span className="text-sm">{address}</span>
+            <div className="mb-3">
+              <div className="flex items-start mb-2">
+                <MapPin className="w-4 h-4 mr-2 mt-0.5 opacity-70" />
+                <span className="text-sm">{address}</span>
+              </div>
+              <button 
+                onClick={(e) => { e.stopPropagation(); handleGoogleMaps(); }}
+                className="ml-6 text-sm text-blue-400 underline hover:text-blue-300"
+              >
+                View on Google Maps
+              </button>
             </div>
           )}
           

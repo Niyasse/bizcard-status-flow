@@ -1,4 +1,3 @@
-
 // Mock data for our application
 
 // Company profiles
@@ -86,6 +85,76 @@ export const companyProfiles = [
     hasNewStatus: false,
     tags: ["Logistics", "Transport"],
     template: "bold"
+  },
+  {
+    id: "company6",
+    name: "Sweet Dreams Bakery",
+    logo: "https://ui-avatars.com/api/?name=Sweet+Dreams&background=F39C12&color=fff",
+    tagline: "Fresh baked goods daily",
+    phone: "+1 (555) 123-9876",
+    email: "orders@sweetdreams.example",
+    website: "https://sweetdreams.example",
+    address: "456 Main Street, Boston, MA 02101",
+    lastUpdated: "3 hours ago",
+    hasNewStatus: true,
+    tags: ["Bakery", "Food & Beverage"],
+    social: {
+      instagram: "https://instagram.com",
+      facebook: "https://facebook.com"
+    },
+    template: "default"
+  },
+  {
+    id: "company7",
+    name: "City Supermarket",
+    logo: "https://ui-avatars.com/api/?name=City+Super&background=27AE60&color=fff",
+    tagline: "Your neighborhood grocery store",
+    phone: "+1 (555) 654-3210",
+    email: "info@citysupermarket.example",
+    website: "https://citysupermarket.example",
+    address: "789 Commerce Ave, Seattle, WA 98101",
+    lastUpdated: "1 hour ago",
+    hasNewStatus: true,
+    tags: ["Supermarket", "Retail"],
+    social: {
+      facebook: "https://facebook.com"
+    },
+    template: "modern"
+  },
+  {
+    id: "company8",
+    name: "Little Angels Baby Shop",
+    logo: "https://ui-avatars.com/api/?name=Little+Angels&background=E91E63&color=fff",
+    tagline: "Everything for your little one",
+    phone: "+1 (555) 789-0123",
+    email: "hello@littleangels.example",
+    website: "https://littleangels.example",
+    address: "321 Family Lane, Austin, TX 78701",
+    lastUpdated: "5 hours ago",
+    hasNewStatus: false,
+    tags: ["Babyshop", "Retail"],
+    social: {
+      instagram: "https://instagram.com",
+      facebook: "https://facebook.com"
+    },
+    template: "minimal"
+  },
+  {
+    id: "company9",
+    name: "Premium Textiles Co",
+    logo: "https://ui-avatars.com/api/?name=Premium+Textiles&background=8E44AD&color=fff",
+    tagline: "Quality fabrics for every need",
+    phone: "+1 (555) 456-7891",
+    email: "sales@premiumtextiles.example",
+    website: "https://premiumtextiles.example",
+    address: "654 Industrial Blvd, Atlanta, GA 30301",
+    lastUpdated: "2 days ago",
+    hasNewStatus: true,
+    tags: ["Textiles", "Retail"],
+    social: {
+      linkedin: "https://linkedin.com"
+    },
+    template: "elegant"
   }
 ];
 

@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ModeToggle } from "./ModeToggle";
@@ -9,14 +10,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { PowerIcon, Plus, Settings } from "lucide-react";
+import { PowerIcon, Settings } from "lucide-react";
 
 export const Header = () => {
   return (
     <header className="bg-whatsapp-cardBack border-b">
-      <div className="container flex items-center justify-between h-16">
-        <Link to="/" className="font-bold text-xl text-whatsapp-green">
-          BizCard
+      <div className="container mx-auto flex items-center justify-between h-16 px-4">
+        <Link to="/" className="flex items-center space-x-2">
+          <div className="w-10 h-10 bg-whatsapp-green rounded-full flex items-center justify-center">
+            <span className="text-white font-bold text-xl">B</span>
+          </div>
+          <span className="font-bold text-xl text-whatsapp-green hidden sm:block">BizCard</span>
         </Link>
         <div className="flex items-center gap-2">
           <ModeToggle />
