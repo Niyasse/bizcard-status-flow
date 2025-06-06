@@ -16,23 +16,23 @@ import {
 
 const categories = [
   "All", 
+  "Bakery", 
+  "Travels", 
+  "Hotels",
+  "Supermarket", 
+  "Textiles",
   "Tech",
   "Design", 
   "Logistics",
   "Healthcare",
   "Education",
   "Finance",
-  "Retail",
-  "Food & Beverage",
-  "Bakery",
-  "Supermarket", 
-  "Babyshop",
-  "Textiles"
+  "Food & Beverage"
 ];
 
 const locations = [
   "New York",
-  "San Francisco",
+  "San Francisco", 
   "London",
   "Tokyo",
   "Sydney",
@@ -129,7 +129,7 @@ const Index = () => {
         <ProfileList profiles={filteredProfiles} hideSearch={true} />
         
         <div className="mt-8 bg-white p-3 sm:p-4 rounded-lg shadow-sm border border-gray-100">
-          <h2 className="text-base sm:text-lg font-medium mb-2">Welcome to BizCard</h2>
+          <h2 className="text-base sm:text-lg font-medium mb-2">Welcome to B</h2>
           <p className="text-gray-600 text-xs sm:text-sm mb-3">
             Discover and connect with businesses through their digital business cards. 
             View their latest status updates and contact them directly.

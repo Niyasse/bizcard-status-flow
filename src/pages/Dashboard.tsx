@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
@@ -15,16 +14,19 @@ import {
   Image, 
   Type 
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Dashboard = () => {
+  const { user } = useAuth();
+  
   // Mock user profile for the dashboard
   const [userProfile, setUserProfile] = useState({
     id: "userCompany",
-    name: "Your Business",
-    logo: "https://ui-avatars.com/api/?name=Your+Business&background=128C7E&color=fff",
+    name: user?.name || "Your Business",
+    logo: `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Your Business')}&background=128C7E&color=fff`,
     tagline: "Your business tagline",
     phone: "+1 (555) 123-4567",
-    email: "contact@yourbusiness.example",
+    email: user?.email || "contact@yourbusiness.example",
     website: "https://yourbusiness.example",
     address: "123 Business St, Business City, 12345",
     template: "default" as const
@@ -45,6 +47,23 @@ const Dashboard = () => {
       template: templateId as any
     });
   };
+
+  if (!user || user.userType !== 'business') {
+    return (
+      <div className="flex flex-col min-h-screen bg-whatsapp-light">
+        <Header />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4">Access Denied</h2>
+            <p className="text-gray-600 mb-4">This page is only available for business owners.</p>
+            <Link to="/login" className="text-whatsapp-green underline">
+              Login as Business Owner
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-whatsapp-light">
@@ -115,17 +134,17 @@ const Dashboard = () => {
                   <span className="text-sm font-medium">Post Status</span>
                 </Link>
                 
-                <Link to="/edit-profile" className="p-3 bg-blue-500/10 rounded-md text-center">
+                <Link to="/create-profile" className="p-3 bg-blue-500/10 rounded-md text-center">
                   <Edit className="w-5 h-5 mx-auto mb-1 text-blue-500" />
                   <span className="text-sm font-medium">Edit Profile</span>
                 </Link>
                 
-                <Link to="/upload-media" className="p-3 bg-purple-500/10 rounded-md text-center">
+                <button className="p-3 bg-purple-500/10 rounded-md text-center">
                   <Image className="w-5 h-5 mx-auto mb-1 text-purple-500" />
                   <span className="text-sm font-medium">Upload Media</span>
-                </Link>
+                </button>
                 
-                <Link to="/update-details" className="p-3 bg-amber-500/10 rounded-md text-center">
+                <Link to="/create-profile" className="p-3 bg-amber-500/10 rounded-md text-center">
                   <Type className="w-5 h-5 mx-auto mb-1 text-amber-500" />
                   <span className="text-sm font-medium">Update Info</span>
                 </Link>
@@ -138,7 +157,7 @@ const Dashboard = () => {
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold">Your Business Card</h2>
-                <Link to="/edit-profile" className="text-whatsapp-green flex items-center text-sm">
+                <Link to="/create-profile" className="text-whatsapp-green flex items-center text-sm">
                   <Edit className="w-4 h-4 mr-1" />
                   Edit
                 </Link>

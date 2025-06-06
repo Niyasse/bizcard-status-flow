@@ -13,7 +13,7 @@ export const companyProfiles = [
     address: "123 Business Ave, Suite 101, New York, NY 10001",
     lastUpdated: "10:30 AM",
     hasNewStatus: true,
-    tags: ["Tech", "Innovation"],
+    tags: ["Tech"],
     social: {
       facebook: "https://facebook.com",
       twitter: "https://twitter.com",
@@ -33,7 +33,7 @@ export const companyProfiles = [
     address: "456 Tech Blvd, San Francisco, CA 94107",
     lastUpdated: "Yesterday",
     hasNewStatus: true,
-    tags: ["Tech", "Innovation", "Software"],
+    tags: ["Tech"],
     social: {
       twitter: "https://twitter.com",
       linkedin: "https://linkedin.com"
@@ -42,52 +42,6 @@ export const companyProfiles = [
   },
   {
     id: "company3",
-    name: "EcoFriendly Solutions",
-    logo: "https://ui-avatars.com/api/?name=Eco+Friendly&background=229954&color=fff",
-    tagline: "Sustainable products for a better world",
-    phone: "+1 (555) 456-7890",
-    email: "info@ecofriendly.example",
-    website: "https://ecofriendly.example",
-    address: "789 Green St, Portland, OR 97201",
-    lastUpdated: "2 days ago",
-    hasNewStatus: false,
-    tags: ["Retail", "Green", "Logistics"],
-    template: "minimal"
-  },
-  {
-    id: "company4",
-    name: "Luxe Design Studio",
-    logo: "https://ui-avatars.com/api/?name=Luxe+Design&background=7D3C98&color=fff",
-    tagline: "Elegant design solutions for discerning clients",
-    phone: "+1 (555) 234-5678",
-    email: "hello@luxedesign.example",
-    website: "https://luxedesign.example",
-    address: "1010 Design District, Miami, FL 33137",
-    lastUpdated: "2 days ago",
-    hasNewStatus: true,
-    tags: ["Design", "Creative"],
-    social: {
-      instagram: "https://instagram.com",
-      linkedin: "https://linkedin.com"
-    },
-    template: "elegant"
-  },
-  {
-    id: "company5",
-    name: "Speedy Logistics",
-    logo: "https://ui-avatars.com/api/?name=Speedy+Logistics&background=E74C3C&color=fff",
-    tagline: "Fast, reliable shipping worldwide",
-    phone: "+1 (555) 345-6789",
-    email: "support@speedylogistics.example",
-    website: "https://speedylogistics.example",
-    address: "2020 Delivery Lane, Chicago, IL 60607",
-    lastUpdated: "1 week ago",
-    hasNewStatus: false,
-    tags: ["Logistics", "Transport"],
-    template: "bold"
-  },
-  {
-    id: "company6",
     name: "Sweet Dreams Bakery",
     logo: "https://ui-avatars.com/api/?name=Sweet+Dreams&background=F39C12&color=fff",
     tagline: "Fresh baked goods daily",
@@ -97,7 +51,7 @@ export const companyProfiles = [
     address: "456 Main Street, Boston, MA 02101",
     lastUpdated: "3 hours ago",
     hasNewStatus: true,
-    tags: ["Bakery", "Food & Beverage"],
+    tags: ["Bakery"],
     social: {
       instagram: "https://instagram.com",
       facebook: "https://facebook.com"
@@ -105,7 +59,7 @@ export const companyProfiles = [
     template: "default"
   },
   {
-    id: "company7",
+    id: "company4",
     name: "City Supermarket",
     logo: "https://ui-avatars.com/api/?name=City+Super&background=27AE60&color=fff",
     tagline: "Your neighborhood grocery store",
@@ -115,32 +69,46 @@ export const companyProfiles = [
     address: "789 Commerce Ave, Seattle, WA 98101",
     lastUpdated: "1 hour ago",
     hasNewStatus: true,
-    tags: ["Supermarket", "Retail"],
+    tags: ["Supermarket"],
     social: {
       facebook: "https://facebook.com"
     },
     template: "modern"
   },
   {
-    id: "company8",
-    name: "Little Angels Baby Shop",
-    logo: "https://ui-avatars.com/api/?name=Little+Angels&background=E91E63&color=fff",
-    tagline: "Everything for your little one",
-    phone: "+1 (555) 789-0123",
-    email: "hello@littleangels.example",
-    website: "https://littleangels.example",
-    address: "321 Family Lane, Austin, TX 78701",
-    lastUpdated: "5 hours ago",
+    id: "company5",
+    name: "Paradise Hotels",
+    logo: "https://ui-avatars.com/api/?name=Paradise+Hotels&background=E67E22&color=fff",
+    tagline: "Luxury accommodation worldwide",
+    phone: "+1 (555) 345-6789",
+    email: "reservations@paradisehotels.example",
+    website: "https://paradisehotels.example",
+    address: "2020 Resort Blvd, Miami, FL 33139",
+    lastUpdated: "2 hours ago",
     hasNewStatus: false,
-    tags: ["Babyshop", "Retail"],
+    tags: ["Hotels"],
+    template: "elegant"
+  },
+  {
+    id: "company6",
+    name: "Adventure Travels",
+    logo: "https://ui-avatars.com/api/?name=Adventure+Travels&background=3498DB&color=fff",
+    tagline: "Discover the world with us",
+    phone: "+1 (555) 456-7890",
+    email: "bookings@adventuretravels.example",
+    website: "https://adventuretravels.example",
+    address: "123 Travel Lane, Denver, CO 80202",
+    lastUpdated: "5 hours ago",
+    hasNewStatus: true,
+    tags: ["Travels"],
     social: {
       instagram: "https://instagram.com",
       facebook: "https://facebook.com"
     },
-    template: "minimal"
+    template: "bold"
   },
   {
-    id: "company9",
+    id: "company7",
     name: "Premium Textiles Co",
     logo: "https://ui-avatars.com/api/?name=Premium+Textiles&background=8E44AD&color=fff",
     tagline: "Quality fabrics for every need",
@@ -150,11 +118,29 @@ export const companyProfiles = [
     address: "654 Industrial Blvd, Atlanta, GA 30301",
     lastUpdated: "2 days ago",
     hasNewStatus: true,
-    tags: ["Textiles", "Retail"],
+    tags: ["Textiles"],
     social: {
       linkedin: "https://linkedin.com"
     },
     template: "elegant"
+  },
+  {
+    id: "company8",
+    name: "Creative Design Studio",
+    logo: "https://ui-avatars.com/api/?name=Creative+Design&background=E74C3C&color=fff",
+    tagline: "Bringing your ideas to life",
+    phone: "+1 (555) 789-0123",
+    email: "hello@creativedesign.example",
+    website: "https://creativedesign.example",
+    address: "321 Design Ave, Portland, OR 97201",
+    lastUpdated: "1 day ago",
+    hasNewStatus: false,
+    tags: ["Design"],
+    social: {
+      instagram: "https://instagram.com",
+      linkedin: "https://linkedin.com"
+    },
+    template: "minimal"
   }
 ];
 
@@ -167,7 +153,7 @@ export const statusUpdates = [
     companyLogo: "https://ui-avatars.com/api/?name=Acme+Inc&background=0D8ABC&color=fff",
     content: "We're excited to announce our new product line launching next month! Stay tuned for more details about our innovative solutions.",
     postedAt: "2023-09-12T08:30:00Z",
-    expiresAt: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(), // 12 hours from now
+    expiresAt: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
     imageUrl: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YnVzaW5lc3MlMjBtZWV0aW5nfGVufDB8fDB8fHww"
   },
   {
@@ -177,7 +163,7 @@ export const statusUpdates = [
     companyLogo: "https://ui-avatars.com/api/?name=TechCorp&background=6C3483&color=fff",
     content: "Join us for our virtual tech conference on September 15th. We'll be showcasing the latest innovations in AI and machine learning. Register now!",
     postedAt: "2023-09-11T14:00:00Z",
-    expiresAt: new Date(Date.now() + 18 * 60 * 60 * 1000).toISOString(), // 18 hours from now
+    expiresAt: new Date(Date.now() + 18 * 60 * 60 * 1000).toISOString(),
     link: {
       url: "https://example.com/tech-conference",
       title: "Register for TechCorp Conference"
@@ -185,12 +171,12 @@ export const statusUpdates = [
   },
   {
     id: "status3",
-    companyId: "company4",
-    companyName: "Luxe Design Studio",
-    companyLogo: "https://ui-avatars.com/api/?name=Luxe+Design&background=7D3C98&color=fff",
-    content: "Check out our latest design project for a luxury hotel in Miami. We're proud of the elegant, sustainable approach we took to transform this space.",
+    companyId: "company3",
+    companyName: "Sweet Dreams Bakery",
+    companyLogo: "https://ui-avatars.com/api/?name=Sweet+Dreams&background=F39C12&color=fff",
+    content: "Check out our latest pastries fresh from the oven! We're proud of our handcrafted approach to baking.",
     postedAt: "2023-09-11T10:15:00Z",
-    expiresAt: new Date(Date.now() + 22 * 60 * 60 * 1000).toISOString(), // 22 hours from now
+    expiresAt: new Date(Date.now() + 22 * 60 * 60 * 1000).toISOString(),
     imageUrl: "https://images.unsplash.com/photo-1618220179428-22790b461013?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bHV4dXJ5JTIwaG90ZWx8ZW58MHx8MHx8fDA%3D"
   }
 ];
