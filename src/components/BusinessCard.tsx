@@ -4,6 +4,10 @@ import { Phone, MessageCircle, Share2, ExternalLink, Mail, MapPin } from "lucide
 import { QRCodeSVG } from "qrcode.react";
 import type { CardTemplateId, CardOrientation } from "@/types";
 
+import { trackingService } from "@/services";
+import { whatsAppEnquiryUrl, qrLink } from "@/lib/engagement";
+import { toWhatsAppId } from "@/lib/validation";
+
 export const profileUrl = (id: string) => `${window.location.origin}/profile/${id}`;
 
 export interface BusinessCardProps {
@@ -46,7 +50,10 @@ export function BusinessCard({
 
   // Handle card actions
   const handleCall = () => window.open(`tel:${phone}`);
-  const handleWhatsApp = () => window.open(`https://wa.me/${whatsapp || phone.replace(/\D/g, '')}`);
+  const handleWhatsApp = () => {
+    const ref = trackingService.enquiry(id);
+    window.open(whatsAppEnquiryUrl(toWhatsAppId(whatsapp || phone), name, ref), '_blank');
+  };
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
@@ -118,7 +125,7 @@ export function BusinessCard({
               <p className="text-sm opacity-90">{tagline}</p>
             </div>
             <div className={orientation === "portrait" ? "mt-1" : "ml-2"} aria-label="QR code to this business profile">
-              <QRCodeSVG value={profileUrl(id)} size={orientation === "portrait" ? 72 : 48} className="bg-white p-1 rounded" />
+              <QRCodeSVG value={qrLink(window.location.origin, id)} size={orientation === "portrait" ? 72 : 48} className="bg-white p-1 rounded" />
             </div>
           </div>
           

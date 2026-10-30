@@ -17,6 +17,7 @@ import LoginPage from "./pages/LoginPage";
 import CreateProfilePage from "./pages/CreateProfilePage";
 import SavedPage from "./pages/SavedPage";
 import CreateStatusPage from "./pages/CreateStatusPage";
+import NotificationsPage from "./pages/NotificationsPage";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/create-profile" element={<CreateProfilePage />} />
               <Route path="/edit-profile" element={<CreateProfilePage />} />
               <Route path="/create-status" element={<CreateStatusPage />} />
+              <Route path="/notifications" element={<NotificationsPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { PowerIcon, Settings, LogIn } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { NotificationBell } from "./NotificationBell";
 
 export const Header = () => {
   const { user, logout } = useAuth();
@@ -25,6 +26,7 @@ export const Header = () => {
           <span className="font-bold text-lg">Bizapp</span>
         </Link>
         <div className="flex items-center gap-2">
+          <NotificationBell />
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
