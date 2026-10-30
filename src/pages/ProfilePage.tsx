@@ -39,6 +39,9 @@ const ProfilePage = () => {
         address={profile.address}
         social={profile.social}
         template={profile.template}
+        orientation={profile.orientation}
+        whatsapp={profile.whatsapp}
+        services={profile.services}
       />
       <SaveButton businessId={profile.id} />
       <section className="mt-6">
