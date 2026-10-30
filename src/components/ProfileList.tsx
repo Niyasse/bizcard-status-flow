@@ -37,13 +37,18 @@ export function ProfileList({ profiles, view = "list" }: { profiles: Business[];
         <Link
           to={`/profile/${p.id}`}
           key={p.id}
-          className="flex items-center gap-3 px-3 py-2 hover:bg-muted/60 transition"
+          className="flex items-center gap-3 px-3 py-1.5 hover:bg-muted/60 transition"
         >
-          <div className={p.hasNewStatus ? "status-ring p-0.5" : ""}>
+          <div className={p.hasNewStatus ? "status-ring p-0.5 shrink-0" : "shrink-0"}>
             <img src={p.logo} alt={p.name} className="w-9 h-9 rounded-full object-cover" />
           </div>
-          <h3 className="flex-1 min-w-0 text-sm font-medium text-foreground truncate">{p.name}</h3>
-          <span className="text-[11px] text-muted-foreground shrink-0">{p.lastUpdated}</span>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-baseline gap-2">
+              <h3 className="flex-1 min-w-0 text-sm leading-4 font-medium text-foreground truncate">{p.name}</h3>
+              <span className="text-[10px] text-muted-foreground shrink-0">{p.lastUpdated}</span>
+            </div>
+            <p className="text-[11px] leading-[13px] text-muted-foreground line-clamp-2">{p.tagline}</p>
+          </div>
         </Link>
       ))}
     </div>
