@@ -168,4 +168,5 @@ export const cardTemplates: CardTemplate[] = [
   { id: "minimal", name: "Minimal", description: "Simple and elegant layout", previewImage: "https://placehold.co/100x60?text=Minimal" },
   { id: "bold", name: "Bold", description: "Striking and impactful design", previewImage: "https://placehold.co/100x60?text=Bold" },
   { id: "elegant", name: "Elegant", description: "Sophisticated and premium feel", previewImage: "https://placehold.co/100x60?text=Elegant" },
+  { id: "royal", name: "Royal", description: "Deep teal with gold accents", previewImage: "https://placehold.co/100x60?text=Royal" },
 ];

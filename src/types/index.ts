@@ -2,7 +2,7 @@
 
 export type ID = string;
 
-export type CardTemplateId = "default" | "modern" | "minimal" | "bold" | "elegant";
+export type CardTemplateId = "default" | "modern" | "minimal" | "bold" | "elegant" | "royal";
 export type CardOrientation = "landscape" | "portrait";
 
 export interface District {
@@ -48,6 +48,8 @@ export interface Business {
   /** Category display names, kept for convenience/filtering in UI */
   tags: string[];
   social?: SocialLinks;
+  /** Short list of services/products shown on the card back */
+  services?: string[];
   template: CardTemplateId;
   orientation: CardOrientation;
   lastUpdated: string;
