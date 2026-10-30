@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSyncExternalStore } from "react";
 import {
-  businessService, walletService, categoryService, locationService, templateService, updateService,
+  businessService, walletService, categoryService, locationService, templateService, updateService, myBusinessService,
 } from "@/services";
 import type { BusinessFilter } from "@/types";
 
@@ -20,3 +20,5 @@ export const useLocalities = (districtId?: string) =>
 export const useTemplates = () =>
   useQuery({ queryKey: ["templates"], queryFn: templateService.list });
 export const useWallet = () => useSyncExternalStore(walletService.subscribe, walletService.get);
+export const useMyBusiness = () =>
+  useQuery({ queryKey: ["myBusiness"], queryFn: myBusinessService.get });

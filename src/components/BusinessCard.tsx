@@ -1,6 +1,10 @@
 
 import { useState } from "react";
-import { Phone, MessageCircle, Share2, ExternalLink, Mail, MapPin, QrCode } from "lucide-react";
+import { Phone, MessageCircle, Share2, ExternalLink, Mail, MapPin } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+import type { CardTemplateId, CardOrientation } from "@/types";
+
+export const profileUrl = (id: string) => `${window.location.origin}/profile/${id}`;
 
 export interface BusinessCardProps {
   id: string;
@@ -17,10 +21,14 @@ export interface BusinessCardProps {
     linkedin?: string;
     instagram?: string;
   };
-  template?: "default" | "modern" | "minimal" | "bold" | "elegant";
+  template?: CardTemplateId;
+  orientation?: CardOrientation;
+  whatsapp?: string;
+  services?: string[];
 }
 
 export function BusinessCard({ 
+  id,
   name, 
   logo, 
   tagline, 
@@ -29,22 +37,26 @@ export function BusinessCard({
   website, 
   address, 
   social,
-  template = "default"
+  template = "default",
+  orientation = "landscape",
+  whatsapp,
+  services,
 }: BusinessCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
 
   // Handle card actions
   const handleCall = () => window.open(`tel:${phone}`);
-  const handleWhatsApp = () => window.open(`https://wa.me/${phone.replace(/\D/g, '')}`);
+  const handleWhatsApp = () => window.open(`https://wa.me/${whatsapp || phone.replace(/\D/g, '')}`);
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
         title: name,
         text: `Check out ${name}'s digital business card`,
-        url: window.location.href,
+        url: profileUrl(id),
       });
     } else {
-      alert(`Share ${name}'s business card: ${window.location.href}`);
+      navigator.clipboard?.writeText(profileUrl(id));
+      alert(`Link copied: ${profileUrl(id)}`);
     }
   };
 
@@ -72,6 +84,11 @@ export function BusinessCard({
           front: "bg-whatsapp-green text-white",
           back: "bg-black text-white"
         };
+      case "royal":
+        return {
+          front: "bg-gradient-to-br from-teal-900 to-emerald-800 text-amber-100 ring-1 ring-amber-300/60",
+          back: "bg-teal-950 text-amber-100 ring-1 ring-amber-300/60"
+        };
       case "elegant":
         return {
           front: "bg-gradient-to-r from-slate-600 to-slate-800 text-white",
@@ -88,20 +105,20 @@ export function BusinessCard({
   const templateClasses = getTemplateClasses();
 
   return (
-    <div className="card-container mx-auto my-6 w-full max-w-md h-64 md:h-72">
+    <div className={`card-container mx-auto my-6 w-full ${orientation === "portrait" ? "max-w-[18rem] h-[30rem]" : "max-w-md h-64 md:h-72"}`}>
       <div className={`card ${isFlipped ? 'card-flip' : ''}`} onClick={() => setIsFlipped(!isFlipped)}>
         {/* Front of card */}
         <div className={`card-front p-6 flex flex-col ${templateClasses.front}`}>
-          <div className="flex items-center mb-4">
-            <div className="w-16 h-16 rounded-full overflow-hidden mr-4 border-2 border-white bg-white flex-shrink-0">
+          <div className={`flex mb-4 ${orientation === "portrait" ? "flex-col items-center text-center gap-2" : "items-center"}`}>
+            <div className={`w-16 h-16 rounded-full overflow-hidden ${orientation === "portrait" ? "" : "mr-4"} border-2 border-white bg-white flex-shrink-0`}>
               <img src={logo} alt={`${name} logo`} className="w-full h-full object-contain" />
             </div>
             <div className="flex-1">
               <h2 className="text-xl font-bold">{name}</h2>
               <p className="text-sm opacity-90">{tagline}</p>
             </div>
-            <div className="ml-2">
-              <QrCode className="w-8 h-8 opacity-70" />
+            <div className={orientation === "portrait" ? "mt-1" : "ml-2"} aria-label="QR code to this business profile">
+              <QRCodeSVG value={profileUrl(id)} size={orientation === "portrait" ? 72 : 48} className="bg-white p-1 rounded" />
             </div>
           </div>
           
@@ -140,6 +157,14 @@ export function BusinessCard({
         <div className={`card-back p-6 ${templateClasses.back}`}>
           <h3 className="text-lg font-semibold mb-4 border-b pb-2">{name}</h3>
           
+          {services && services.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-3">
+              {services.slice(0, 6).map((s) => (
+                <span key={s} className="text-xs px-2 py-0.5 rounded-full bg-black/10">{s}</span>
+              ))}
+            </div>
+          )}
+
           {website && (
             <div className="flex items-center mb-3">
               <ExternalLink className="w-4 h-4 mr-2 opacity-70" />

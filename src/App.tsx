@@ -38,6 +38,7 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/create-profile" element={<CreateProfilePage />} />
+              <Route path="/edit-profile" element={<CreateProfilePage />} />
               <Route path="/create-status" element={<CreateStatusPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

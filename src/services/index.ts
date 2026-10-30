@@ -39,9 +39,29 @@ export function filterBusinesses(list: Business[], f: BusinessFilter = {}): Busi
   );
 }
 
+/* ---------- Owner's registered business (localStorage until the backend exists) ---------- */
+const MY_BUSINESS_KEY = "bizapp.myBusiness";
+export const MY_BUSINESS_ID = "my-business";
+function readMine(): Business | null {
+  try { const v = JSON.parse(localStorage.getItem(MY_BUSINESS_KEY) ?? "null"); return v && v.id ? v : null; } catch { return null; }
+}
+const allBusinesses = (): Business[] => { const m = readMine(); return m ? [m, ...db.businesses] : db.businesses; };
+
 export const businessService = {
-  list: (filter?: BusinessFilter): Promise<Business[]> => delay(filterBusinesses(db.businesses, filter)),
-  getById: (id: string): Promise<Business | null> => delay(db.businesses.find((b) => b.id === id) ?? null),
+  list: (filter?: BusinessFilter): Promise<Business[]> => delay(filterBusinesses(allBusinesses(), filter)),
+  getById: (id: string): Promise<Business | null> => delay(allBusinesses().find((b) => b.id === id) ?? null),
+};
+
+export const myBusinessService = {
+  get: (): Promise<Business | null> => delay(readMine()),
+  /** Create or update the owner's business; category names are derived from ids. */
+  save: (input: Omit<Business, "id" | "tags" | "lastUpdated" | "hasNewStatus">): Promise<Business> => {
+    const tags = db.categories.filter((c) => input.categoryIds.includes(c.id)).map((c) => c.name);
+    const b: Business = { ...input, id: MY_BUSINESS_ID, tags, lastUpdated: "Just now", hasNewStatus: false };
+    localStorage.setItem(MY_BUSINESS_KEY, JSON.stringify(b));
+    return delay(b);
+  },
+  remove: () => { localStorage.removeItem(MY_BUSINESS_KEY); },
 };
 
 export const professionalService = {
