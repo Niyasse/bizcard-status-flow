@@ -1,78 +1,76 @@
+import React, { createContext, useContext, useState } from "react";
+import type { AppUser, UserType } from "@/types";
+import { userService } from "@/services/admin";
+import { normalizePhone, verifyOtp } from "@/lib/auth";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-
-export type UserType = 'client' | 'admin' | 'business';
-
-export interface User {
-  id: string;
-  email: string;
-  userType: UserType;
-  name: string;
-  businessId?: string; // For business owners
-}
+export type { UserType };
+export type User = AppUser;
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string, userType: UserType) => Promise<boolean>;
-  logout: () => void;
   isLoading: boolean;
+  /** Demo email/password login (password: "password"). */
+  login: (email: string, password: string, userType: UserType) => Promise<boolean>;
+  /** Mock OTP login for an existing phone number. */
+  loginWithOtp: (phone: string, otp: string) => Promise<User | null>;
+  /** Mock OTP signup; returns the created user, or null for a wrong OTP. */
+  signup: (data: { name: string; phone: string; email: string; role: UserType }, otp: string) => Promise<User | null>;
+  updateProfile: (patch: Partial<Pick<User, "name" | "email" | "phone">>) => void;
+  logout: () => void;
 }
 
+const KEY = "currentUser";
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within an AuthProvider");
+  return ctx;
+};
+
+const readUser = (): User | null => {
+  try { return JSON.parse(localStorage.getItem(KEY) ?? "null"); } catch { return null; }
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Mock users for demonstration
-  const mockUsers = {
-    'admin@b.com': { id: 'admin1', email: 'admin@b.com', userType: 'admin' as UserType, name: 'Admin User' },
-    'client@b.com': { id: 'client1', email: 'client@b.com', userType: 'client' as UserType, name: 'Client User' },
-    'business@b.com': { id: 'business1', email: 'business@b.com', userType: 'business' as UserType, name: 'Business Owner', businessId: 'company1' }
+  const [user, setUserState] = useState<User | null>(readUser);
+  const setUser = (u: User | null) => {
+    setUserState(u);
+    if (u) localStorage.setItem(KEY, JSON.stringify(u)); else localStorage.removeItem(KEY);
   };
 
-  useEffect(() => {
-    // Check if user is already logged in (from localStorage)
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    setIsLoading(false);
-  }, []);
-
-  const login = async (email: string, password: string, userType: UserType): Promise<boolean> => {
-    setIsLoading(true);
-    
-    // Mock authentication - in real app, this would be an API call
-    const mockUser = mockUsers[email as keyof typeof mockUsers];
-    
-    if (mockUser && mockUser.userType === userType && password === 'password') {
-      setUser(mockUser);
-      localStorage.setItem('currentUser', JSON.stringify(mockUser));
-      setIsLoading(false);
-      return true;
-    }
-    
-    setIsLoading(false);
-    return false;
+  const value: AuthContextType = {
+    user,
+    isLoading: false,
+    login: async (email, password, userType) => {
+      const u = userService.findByEmail(email.trim());
+      if (u && u.userType === userType && password === "password") { setUser(u); return true; }
+      return false;
+    },
+    loginWithOtp: async (phone, otp) => {
+      const u = userService.findByPhone(normalizePhone(phone));
+      if (!u || !verifyOtp(otp)) return null;
+      setUser(u);
+      return u;
+    },
+    signup: async ({ name, phone, email, role }, otp) => {
+      if (!verifyOtp(otp) || role === "admin") return null;
+      const u: User = {
+        id: `u-${Date.now()}`, name: name.trim(), phone: normalizePhone(phone), email: email.trim(), userType: role,
+        businessId: role === "business" ? "my-business" : undefined,
+      };
+      userService.upsert(u);
+      setUser(u);
+      return u;
+    },
+    updateProfile: (patch) => {
+      if (!user) return;
+      const next = { ...user, ...patch, phone: patch.phone ? normalizePhone(patch.phone) : user.phone };
+      userService.upsert(next);
+      setUser(next);
+    },
+    logout: () => setUser(null),
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('currentUser');
-  };
-
-  return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
