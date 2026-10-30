@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { BusinessCard } from "@/components/BusinessCard";
-import { cardTemplates } from "@/data/mockData";
+import { useCatalog } from "@/hooks/use-data";
 import { 
   ArrowLeft, 
   Edit, 
@@ -18,6 +18,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { cardTemplates, businesses } = useCatalog();
   
   // Mock user profile for the dashboard
   const [userProfile, setUserProfile] = useState({
@@ -25,10 +26,10 @@ const Dashboard = () => {
     name: user?.name || "Your Business",
     logo: `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Your Business')}&background=128C7E&color=fff`,
     tagline: "Your business tagline",
-    phone: "+1 (555) 123-4567",
+    phone: businesses[0].phone,
     email: user?.email || "contact@yourbusiness.example",
     website: "https://yourbusiness.example",
-    address: "123 Business St, Business City, 12345",
+    address: businesses[0].address,
     template: "default" as const
   });
   
