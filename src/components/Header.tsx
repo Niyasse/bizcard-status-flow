@@ -17,13 +17,13 @@ export const Header = () => {
   const { user, logout } = useAuth();
 
   return (
-    <header className="bg-whatsapp-cardBack border-b">
-      <div className="container mx-auto flex items-center justify-between h-16 px-4">
+    <header className="sticky top-0 z-40 bg-primary text-primary-foreground shadow-sm">
+      <div className="mx-auto max-w-2xl flex items-center justify-between h-14 px-3 sm:px-4">
         <Link to="/" className="flex items-center space-x-2">
-          <div className="w-10 h-10 bg-whatsapp-green rounded-full flex items-center justify-center">
-            <span className="text-white font-bold text-xl">B</span>
+          <div className="w-9 h-9 bg-primary-foreground rounded-full flex items-center justify-center">
+            <span className="text-primary font-bold text-xl">B</span>
           </div>
-          <span className="font-bold text-xl text-whatsapp-green hidden sm:block">B</span>
+          <span className="font-bold text-lg">Bizapp</span>
         </Link>
         <div className="flex items-center gap-2">
           <ModeToggle />
@@ -68,7 +68,7 @@ export const Header = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button asChild variant="ghost" size="sm">
+            <Button asChild variant="ghost" size="sm" className="hover:bg-primary-foreground/10 hover:text-primary-foreground">
               <Link to="/login">
                 <LogIn className="h-4 w-4 mr-2" />
                 Login
