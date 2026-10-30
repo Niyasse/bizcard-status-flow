@@ -4,8 +4,18 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 216 20% 95%;
+    --foreground: 216 8% 12%;
+    --brand-primary: 173 77% 31%;
+    --brand-accent: 142 70% 49%;
+    --brand-blue: 198 87% 57%;
+    --card-back: 220 38% 94%;
+    --premium-start: 215 19% 35%;
+    --premium-end: 215 28% 17%;
+    --premium-back: 215 25% 27%;
+    --premium-ink: 0 0% 0%;
+    --on-premium: 0 0% 100%;
+    --card-shadow: 0 4px 12px hsl(216 8% 12% / 0.08);
 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -13,8 +23,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: var(--brand-primary);
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -30,7 +40,7 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: var(--brand-primary);
 
     --radius: 0.5rem;
 
@@ -104,8 +114,6 @@
 @layer components {
   .card-container {
     perspective: 1000px;
-    width: 100%;
-    height: 100%;
   }
 
   .card {
@@ -182,3 +190,15 @@
 .slide-in {
   animation: slideIn 0.4s ease-out;
 }
+
+.premium-modern-front { background: linear-gradient(to bottom right, hsl(var(--brand-blue)), hsl(var(--brand-primary))); color: hsl(var(--on-premium)); }
+.premium-modern-back { background: hsl(var(--premium-end)); color: hsl(var(--on-premium)); }
+.premium-minimal-front { background: hsl(var(--card)); border: 1px solid hsl(var(--border)); }
+.premium-minimal-back { background: hsl(var(--muted)); border: 1px solid hsl(var(--border)); }
+.premium-bold-front { background: hsl(var(--brand-primary)); color: hsl(var(--on-premium)); }
+.premium-bold-back { background: hsl(var(--premium-ink)); color: hsl(var(--on-premium)); }
+.premium-elegant-front { background: linear-gradient(to right, hsl(var(--premium-start)), hsl(var(--premium-end))); color: hsl(var(--on-premium)); }
+.premium-elegant-back { background: hsl(var(--premium-back)); color: hsl(var(--on-premium)); }
+.premium-default-front { background: hsl(var(--card)); box-shadow: var(--card-shadow); }
+.premium-default-back { background: hsl(var(--card-back)); box-shadow: var(--card-shadow); }
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } .slide-in, .fade-in { animation: none; } }

@@ -63,13 +63,13 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				whatsapp: {
-					green: '#128C7E',
-					lightGreen: '#25D366',
-					blue: '#34B7F1',
-					light: '#F0F2F5',
-					cardFront: '#FFFFFF',
-					cardBack: '#E9EDF5',
-					text: '#1C1E21'
+					green: 'hsl(var(--brand-primary))',
+					lightGreen: 'hsl(var(--brand-accent))',
+					blue: 'hsl(var(--brand-blue))',
+					light: 'hsl(var(--background))',
+					cardFront: 'hsl(var(--card))',
+					cardBack: 'hsl(var(--card-back))',
+					text: 'hsl(var(--foreground))'
 				}
 			},
 			borderRadius: {

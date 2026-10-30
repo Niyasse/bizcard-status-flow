@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { Phone, MessageCircle, Share2, ExternalLink, Mail, MapPin, QrCode } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export interface BusinessCardProps {
   id: string;
@@ -59,28 +60,28 @@ export function BusinessCard({
     switch(template) {
       case "modern":
         return {
-          front: "bg-gradient-to-br from-whatsapp-blue to-whatsapp-green text-white",
-          back: "bg-slate-800 text-white"
+          front: "premium-modern-front",
+          back: "premium-modern-back"
         };
       case "minimal":
         return {
-          front: "bg-white border border-gray-200",
-          back: "bg-gray-50 border border-gray-200"
+          front: "premium-minimal-front",
+          back: "premium-minimal-back"
         };
       case "bold":
         return {
-          front: "bg-whatsapp-green text-white",
-          back: "bg-black text-white"
+          front: "premium-bold-front",
+          back: "premium-bold-back"
         };
       case "elegant":
         return {
-          front: "bg-gradient-to-r from-slate-600 to-slate-800 text-white",
-          back: "bg-slate-700 text-white"
+          front: "premium-elegant-front",
+          back: "premium-elegant-back"
         };
       default:
         return {
-          front: "bg-white shadow-md",
-          back: "bg-whatsapp-cardBack shadow-md"
+          front: "premium-default-front",
+          back: "premium-default-back"
         };
     }
   };
@@ -88,16 +89,16 @@ export function BusinessCard({
   const templateClasses = getTemplateClasses();
 
   return (
-    <div className="card-container mx-auto my-6 w-full max-w-md h-64 md:h-72">
+    <div className="card-container mx-auto my-6 w-full max-w-md h-[340px] sm:h-80">
       <div className={`card ${isFlipped ? 'card-flip' : ''}`} onClick={() => setIsFlipped(!isFlipped)}>
         {/* Front of card */}
-        <div className={`card-front p-6 flex flex-col ${templateClasses.front}`}>
+        <div aria-hidden={isFlipped} className={`card-front p-4 sm:p-6 flex flex-col ${templateClasses.front}`}>
           <div className="flex items-center mb-4">
-            <div className="w-16 h-16 rounded-full overflow-hidden mr-4 border-2 border-white bg-white flex-shrink-0">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden mr-3 border-2 border-card bg-card flex-shrink-0">
               <img src={logo} alt={`${name} logo`} className="w-full h-full object-contain" />
             </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-bold">{name}</h2>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg sm:text-xl font-bold break-words">{name}</h2>
               <p className="text-sm opacity-90">{tagline}</p>
             </div>
             <div className="ml-2">
@@ -112,38 +113,36 @@ export function BusinessCard({
             </div>
             <div className="flex items-center">
               <Mail className="w-4 h-4 mr-2 opacity-70" />
-              <span className="text-sm">{email}</span>
+              <span className="text-sm break-all">{email}</span>
             </div>
           </div>
           
-          <div className="flex justify-around pt-4 border-t border-t-black/10">
-            <button onClick={(e) => { e.stopPropagation(); handleCall(); }} className="flex flex-col items-center text-sm">
+          <div className="flex justify-around pt-3 pb-3 border-t border-current/10">
+            <Button tabIndex={isFlipped?-1:0} variant="ghost" onClick={(e) => { e.stopPropagation(); handleCall(); }} className="h-14 flex flex-col items-center gap-0 text-sm">
               <Phone className="w-5 h-5 mb-1" />
               <span>Call</span>
-            </button>
-            <button onClick={(e) => { e.stopPropagation(); handleWhatsApp(); }} className="flex flex-col items-center text-sm">
+            </Button>
+            <Button tabIndex={isFlipped?-1:0} variant="ghost" onClick={(e) => { e.stopPropagation(); handleWhatsApp(); }} className="h-14 flex flex-col items-center gap-0 text-sm">
               <MessageCircle className="w-5 h-5 mb-1" />
               <span>WhatsApp</span>
-            </button>
-            <button onClick={(e) => { e.stopPropagation(); handleShare(); }} className="flex flex-col items-center text-sm">
+            </Button>
+            <Button tabIndex={isFlipped?-1:0} variant="ghost" onClick={(e) => { e.stopPropagation(); handleShare(); }} className="h-14 flex flex-col items-center gap-0 text-sm">
               <Share2 className="w-5 h-5 mb-1" />
               <span>Share</span>
-            </button>
+            </Button>
           </div>
           
-          <div className="absolute bottom-2 right-2 text-xs opacity-50">
-            Tap to flip
-          </div>
+          <Button tabIndex={isFlipped?-1:0} variant="ghost" size="sm" className="absolute bottom-0 right-1 h-7 text-xs" onClick={e=>{e.stopPropagation();setIsFlipped(true);}}>Flip card</Button>
         </div>
         
         {/* Back of card */}
-        <div className={`card-back p-6 ${templateClasses.back}`}>
+        <div aria-hidden={!isFlipped} className={`card-back p-4 sm:p-6 ${templateClasses.back}`}>
           <h3 className="text-lg font-semibold mb-4 border-b pb-2">{name}</h3>
           
           {website && (
             <div className="flex items-center mb-3">
               <ExternalLink className="w-4 h-4 mr-2 opacity-70" />
-              <a href={website} target="_blank" rel="noopener noreferrer" className="text-sm underline" onClick={(e) => e.stopPropagation()}>
+              <a tabIndex={isFlipped?0:-1} href={website} target="_blank" rel="noopener noreferrer" className="text-sm underline break-all" onClick={(e) => e.stopPropagation()}>
                 {website.replace(/^https?:\/\/(www\.)?/, '')}
               </a>
             </div>
@@ -155,12 +154,12 @@ export function BusinessCard({
                 <MapPin className="w-4 h-4 mr-2 mt-0.5 opacity-70" />
                 <span className="text-sm">{address}</span>
               </div>
-              <button 
+              <Button tabIndex={isFlipped?0:-1} variant="link" size="sm"
                 onClick={(e) => { e.stopPropagation(); handleGoogleMaps(); }}
-                className="ml-6 text-sm text-blue-400 underline hover:text-blue-300"
+                className="ml-6 p-0 text-sm text-inherit underline"
               >
                 View on Google Maps
-              </button>
+              </Button>
             </div>
           )}
           
@@ -194,9 +193,7 @@ export function BusinessCard({
             </div>
           )}
           
-          <div className="absolute bottom-2 right-2 text-xs opacity-50">
-            Tap to flip
-          </div>
+          <Button tabIndex={isFlipped?0:-1} variant="ghost" size="sm" className="absolute bottom-0 right-1 h-7 text-xs" onClick={e=>{e.stopPropagation();setIsFlipped(false);}}>Flip card</Button>
         </div>
       </div>
     </div>
