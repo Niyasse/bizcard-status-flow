@@ -19,6 +19,7 @@ export interface Locality {
 export interface Category {
   id: ID;
   name: string;
+  nameMl?: string;
   kind: "business" | "service";
 }
 
@@ -33,6 +34,7 @@ export interface SocialLinks {
 export interface Business {
   id: ID;
   name: string;
+  nameMl?: string; // Malayalam name for bilingual search
   logo: string;
   tagline: string;
   phone: string;

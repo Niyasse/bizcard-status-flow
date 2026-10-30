@@ -4,12 +4,16 @@ import { Plus } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatusItem } from "@/components/StatusItem";
-import { useUpdates } from "@/hooks/use-data";
+import { useUpdates, useWallet } from "@/hooks/use-data";
+import { walletService } from "@/services";
 import { cn } from "@/lib/utils";
 
 const StatusPage = () => {
   const [filter, setFilter] = useState("all");
-  const { data: updates = [] } = useUpdates();
+  const [feed, setFeed] = useState<"following" | "all">("following");
+  const wallet = useWallet();
+  const { data: allUpdates = [] } = useUpdates();
+  const updates = feed === "all" ? allUpdates : walletService.followedUpdates(allUpdates, wallet);
   const companies = Array.from(new Map(updates.map((u) => [u.companyId, u])).values());
   const shown = filter === "all" ? updates : updates.filter((u) => u.companyId === filter);
 
@@ -30,6 +34,10 @@ const StatusPage = () => {
           </Link>
         }
       />
+      <div className="flex gap-2 mb-3">
+        <button className={chip(feed === "following")} onClick={() => { setFeed("following"); setFilter("all"); }}>Following</button>
+        <button className={chip(feed === "all")} onClick={() => { setFeed("all"); setFilter("all"); }}>All offers</button>
+      </div>
       <div className="flex overflow-x-auto no-scrollbar gap-2 mb-4">
         <button className={chip(filter === "all")} onClick={() => setFilter("all")}>All</button>
         {companies.map((u) => (
@@ -40,7 +48,9 @@ const StatusPage = () => {
         ))}
       </div>
       {shown.length ? shown.map((u) => <StatusItem key={u.id} status={u} />) : (
-        <div className="bg-card rounded-lg p-6 text-center text-muted-foreground">No updates right now</div>
+        <div className="bg-card rounded-lg p-6 text-center text-muted-foreground text-sm">
+          {feed === "following" ? "No offers from your saved cards. Save a business to follow its offers." : "No updates right now"}
+        </div>
       )}
     </AppShell>
   );

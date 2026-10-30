@@ -37,24 +37,24 @@ export const localities: Locality[] = [
 ];
 
 export const categories: Category[] = [
-  { id: "bakery", name: "Bakery", kind: "business" },
-  { id: "supermarket", name: "Supermarket", kind: "business" },
-  { id: "textiles", name: "Textiles", kind: "business" },
-  { id: "hotels", name: "Hotels", kind: "business" },
-  { id: "restaurant", name: "Restaurant", kind: "business" },
-  { id: "travels", name: "Travels", kind: "business" },
-  { id: "babyshop", name: "Babyshop", kind: "business" },
-  { id: "jewellery", name: "Jewellery", kind: "business" },
-  { id: "ayurveda", name: "Ayurveda", kind: "service" },
-  { id: "healthcare", name: "Healthcare", kind: "service" },
-  { id: "education", name: "Education", kind: "service" },
-  { id: "electrician", name: "Electrician", kind: "service" },
-  { id: "plumber", name: "Plumber", kind: "service" },
+  { id: "bakery", name: "Bakery", nameMl: "ബേക്കറി", kind: "business" },
+  { id: "supermarket", name: "Supermarket", nameMl: "സൂപ്പർമാർക്കറ്റ്", kind: "business" },
+  { id: "textiles", name: "Textiles", nameMl: "തുണിക്കട", kind: "business" },
+  { id: "hotels", name: "Hotels", nameMl: "ഹോട്ടൽ", kind: "business" },
+  { id: "restaurant", name: "Restaurant", nameMl: "റെസ്റ്റോറന്റ്", kind: "business" },
+  { id: "travels", name: "Travels", nameMl: "ട്രാവൽസ്", kind: "business" },
+  { id: "babyshop", name: "Babyshop", nameMl: "ബേബി ഷോപ്പ്", kind: "business" },
+  { id: "jewellery", name: "Jewellery", nameMl: "ജ്വല്ലറി", kind: "business" },
+  { id: "ayurveda", name: "Ayurveda", nameMl: "ആയുർവേദം", kind: "service" },
+  { id: "healthcare", name: "Healthcare", nameMl: "ആരോഗ്യം", kind: "service" },
+  { id: "education", name: "Education", nameMl: "വിദ്യാഭ്യാസം", kind: "service" },
+  { id: "electrician", name: "Electrician", nameMl: "ഇലക്ട്രീഷ്യൻ", kind: "service" },
+  { id: "plumber", name: "Plumber", nameMl: "പ്ലംബർ", kind: "service" },
 ];
 
 export const businesses: Business[] = [
   {
-    id: "b1", name: "Kochi Bake House", logo: logo("Kochi Bake", "C0392B"),
+    id: "b1", name: "Kochi Bake House", nameMl: "കൊച്ചി ബേക്ക് ഹൗസ്", logo: logo("Kochi Bake", "C0392B"),
     tagline: "Plum cakes, puffs & Kerala snacks since 1987",
     phone: "+91 98470 12345", whatsapp: "919847012345", email: "hello@kochibake.in",
     website: "https://kochibake.in", address: "Edappally Junction, Kochi, Ernakulam 682024",
@@ -63,7 +63,7 @@ export const businesses: Business[] = [
     template: "default", orientation: "landscape", lastUpdated: "10:30 AM", hasNewStatus: true, ownerId: "business1",
   },
   {
-    id: "b2", name: "Malabar Fresh Mart", logo: logo("Malabar Fresh", "27AE60"),
+    id: "b2", name: "Malabar Fresh Mart", nameMl: "മലബാർ ഫ്രഷ് മാർട്ട്", logo: logo("Malabar Fresh", "27AE60"),
     tagline: "Daily groceries, fish & vegetables delivered",
     phone: "+91 94460 22334", email: "care@malabarfresh.in",
     address: "Mavoor Road, Kozhikode 673004",
@@ -72,7 +72,7 @@ export const businesses: Business[] = [
     template: "modern", orientation: "portrait", lastUpdated: "1 hour ago", hasNewStatus: true,
   },
   {
-    id: "b3", name: "Seematti Weaves", logo: logo("Seematti Weaves", "8E44AD"),
+    id: "b3", name: "Seematti Weaves", nameMl: "സീമാട്ടി വീവ്സ്", logo: logo("Seematti Weaves", "8E44AD"),
     tagline: "Kasavu sarees, set mundu & wedding silks",
     phone: "+91 98950 55667", email: "sales@seemattiweaves.in", website: "https://seemattiweaves.in",
     address: "MG Road, Ernakulam 682035",
@@ -81,7 +81,7 @@ export const businesses: Business[] = [
     template: "elegant", orientation: "landscape", lastUpdated: "2 days ago", hasNewStatus: true,
   },
   {
-    id: "b4", name: "Kumarakom Lake Retreat", logo: logo("Lake Retreat", "E67E22"),
+    id: "b4", name: "Kumarakom Lake Retreat", nameMl: "കുമരകം ലേക്ക് റിട്രീറ്റ്", logo: logo("Lake Retreat", "E67E22"),
     tagline: "Backwater houseboats & lakeside cottages",
     phone: "+91 94471 88990", email: "stay@kumarakomretreat.in", website: "https://kumarakomretreat.in",
     address: "Kumarakom North, Kottayam 686563",
@@ -89,7 +89,7 @@ export const businesses: Business[] = [
     template: "elegant", orientation: "portrait", lastUpdated: "2 hours ago", hasNewStatus: false,
   },
   {
-    id: "b5", name: "Sreerag Tours & Travels", logo: logo("Sreerag Tours", "3498DB"),
+    id: "b5", name: "Sreerag Tours & Travels", nameMl: "ശ്രീരാഗ് ടൂർസ്", logo: logo("Sreerag Tours", "3498DB"),
     tagline: "Munnar, Thekkady & Wayanad packages",
     phone: "+91 97440 33445", email: "book@sreeragtours.in",
     address: "Swaraj Round East, Thrissur 680001",
@@ -98,7 +98,7 @@ export const businesses: Business[] = [
     template: "bold", orientation: "landscape", lastUpdated: "5 hours ago", hasNewStatus: true,
   },
   {
-    id: "b6", name: "Paragon Family Restaurant", logo: logo("Paragon Family", "D35400"),
+    id: "b6", name: "Paragon Family Restaurant", nameMl: "പാരഗൺ ഫാമിലി റെസ്റ്റോറന്റ്", logo: logo("Paragon Family", "D35400"),
     tagline: "Malabar biryani & seafood thali",
     phone: "+91 95390 77881", email: "info@paragonfamily.in",
     address: "Thalassery Main Road, Kannur 670101",
@@ -106,7 +106,7 @@ export const businesses: Business[] = [
     template: "default", orientation: "portrait", lastUpdated: "3 hours ago", hasNewStatus: true,
   },
   {
-    id: "b7", name: "Kunjus Baby World", logo: logo("Kunjus Baby", "F06292"),
+    id: "b7", name: "Kunjus Baby World", nameMl: "കുഞ്ഞൂസ് ബേബി വേൾഡ്", logo: logo("Kunjus Baby", "F06292"),
     tagline: "Baby clothing, toys & care essentials",
     phone: "+91 90370 44556", email: "hello@kunjusbaby.in",
     address: "Kowdiar, Thiruvananthapuram 695003",
@@ -115,7 +115,7 @@ export const businesses: Business[] = [
     template: "minimal", orientation: "landscape", lastUpdated: "1 day ago", hasNewStatus: false,
   },
   {
-    id: "b8", name: "Vaidyaratnam Ayur Clinic", logo: logo("Vaidyaratnam Ayur", "16A085"),
+    id: "b8", name: "Vaidyaratnam Ayur Clinic", nameMl: "വൈദ്യരത്നം ആയുർ ക്ലിനിക്", logo: logo("Vaidyaratnam Ayur", "16A085"),
     tagline: "Panchakarma & traditional Ayurvedic care",
     phone: "+91 94953 66778", email: "care@vaidyaratnamclinic.in",
     address: "Olavakkode, Palakkad 678002",
@@ -123,7 +123,7 @@ export const businesses: Business[] = [
     template: "modern", orientation: "portrait", lastUpdated: "6 hours ago", hasNewStatus: true,
   },
   {
-    id: "b9", name: "Alleppey Gold Palace", logo: logo("Gold Palace", "B7950B"),
+    id: "b9", name: "Alleppey Gold Palace", nameMl: "ആലപ്പി ഗോൾഡ് പാലസ്", logo: logo("Gold Palace", "B7950B"),
     tagline: "916 hallmark gold & temple jewellery",
     phone: "+91 98461 99001", email: "info@alleppeygold.in",
     address: "Mullakkal, Alappuzha 688011",

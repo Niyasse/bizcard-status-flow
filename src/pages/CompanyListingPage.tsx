@@ -19,7 +19,7 @@ const CompanyListingPage = () => {
         <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
         <input
           type="search"
-          placeholder="Search businesses…"
+          placeholder="Search in English or മലയാളം…"
           aria-label="Search businesses"
           className="w-full h-10 pl-9 pr-4 bg-card rounded-full text-sm border focus:outline-none focus:ring-2 focus:ring-ring/40"
           value={search}
