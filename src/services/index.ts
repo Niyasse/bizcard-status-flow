@@ -93,3 +93,18 @@ export const walletService = {
     all.filter((u) => s.savedIds.includes(u.companyId) && !s.mutedIds.includes(u.companyId)),
   _reset: () => { cache = null; },
 };
+
+/* ---------- Recent searches (localStorage until the backend exists) ---------- */
+const RECENT_KEY = "bizapp.recentSearches";
+export const recentSearchService = {
+  get: (): string[] => {
+    try { const v = JSON.parse(localStorage.getItem(RECENT_KEY) ?? "[]"); return Array.isArray(v) ? v : []; } catch { return []; }
+  },
+  add: (q: string): string[] => {
+    const t = q.trim();
+    const next = t ? [t, ...recentSearchService.get().filter((x) => x !== t)].slice(0, 6) : recentSearchService.get();
+    try { localStorage.setItem(RECENT_KEY, JSON.stringify(next)); } catch { /* storage unavailable */ }
+    return next;
+  },
+  clear: () => { try { localStorage.removeItem(RECENT_KEY); } catch { /* ignore */ } },
+};
