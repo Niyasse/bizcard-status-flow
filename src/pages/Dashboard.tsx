@@ -6,7 +6,7 @@ import { BusinessCard, profileUrl } from "@/components/BusinessCard";
 import { BusinessQrCode } from "@/components/BusinessQrCode";
 import { Button } from "@/components/ui/button";
 import { useMyBusiness, useOwnUpdates, useTracking, useWallet } from "@/hooks/use-data";
-import { mockBaseline, trackingService } from "@/services";
+import { mockBaseline, trackingService, moderationService, MY_BUSINESS_ID } from "@/services";
 import { isActive, MAX_ACTIVE_UPDATES } from "@/lib/engagement";
 import { useToast } from "@/hooks/use-toast";
 
@@ -51,6 +51,10 @@ const Dashboard = () => {
   return (
     <AppShell>
       <PageHeader title="My business card" subtitle={b.tags.join(" · ")} backTo="/" />
+      {(() => { const st = moderationService.statusOf(b.id, b.id === MY_BUSINESS_ID); return st !== "approved" && (
+        <p role="status" className="mb-3 rounded-lg bg-secondary px-3 py-2 text-sm">
+          Listing status: <strong className="capitalize">{st}</strong>{st === "pending" ? " — visible in Discover after admin approval." : " — not visible in Discover."}
+        </p>); })()}
       <BusinessCard id={b.id} name={b.name} logo={b.logo} tagline={b.tagline} phone={b.phone} email={b.email}
         website={b.website} address={b.address} social={b.social} services={b.services} whatsapp={b.whatsapp}
         template={b.template} orientation={b.orientation} />
