@@ -4,6 +4,9 @@
 import * as db from "@/data/mockData";
 import { ownUpdateService } from "./engagement";
 export * from "./engagement";
+export * from "./admin";
+import { moderationService } from "./admin";
+import { isPublicListing } from "@/lib/auth";
 import type {
   Business, BusinessFilter, BusinessUpdate, CardTemplate, Category, District, Locality, ServiceProfessional,
 } from "@/types";
@@ -50,7 +53,11 @@ function readMine(): Business | null {
 const allBusinesses = (): Business[] => { const m = readMine(); return m ? [m, ...db.businesses] : db.businesses; };
 
 export const businessService = {
-  list: (filter?: BusinessFilter): Promise<Business[]> => delay(filterBusinesses(allBusinesses(), filter)),
+  /** Public discovery: approved listings only. */
+  list: (filter?: BusinessFilter): Promise<Business[]> =>
+    delay(filterBusinesses(allBusinesses().filter((b) => isPublicListing(moderationService.statusOf(b.id, b.id === MY_BUSINESS_ID))), filter)),
+  /** Admin: every listing regardless of moderation status. */
+  listAll: (): Promise<Business[]> => delay(allBusinesses()),
   getById: (id: string): Promise<Business | null> => delay(allBusinesses().find((b) => b.id === id) ?? null),
 };
 
