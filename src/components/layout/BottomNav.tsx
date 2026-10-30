@@ -1,12 +1,12 @@
 import { NavLink } from "react-router-dom";
-import { Home, Megaphone, LayoutGrid, Bookmark } from "lucide-react";
+import { Compass, MessageSquare, LayoutGrid, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const tabs = [
-  { to: "/", label: "Home", icon: Home, end: true },
-  { to: "/status", label: "Updates", icon: Megaphone, end: false },
-  { to: "/saved", label: "Saved", icon: Bookmark, end: false },
+  { to: "/", label: "Discover", icon: Compass, end: true },
   { to: "/companies", label: "Categories", icon: LayoutGrid, end: false },
+  { to: "/saved", label: "My Cards", icon: Wallet, end: false },
+  { to: "/status", label: "Updates", icon: MessageSquare, end: false },
 ];
 
 export function BottomNav() {
