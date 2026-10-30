@@ -3,6 +3,7 @@ import { Megaphone } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BusinessCard } from "@/components/BusinessCard";
+import { SaveButton } from "@/components/SaveButton";
 import { StatusItem } from "@/components/StatusItem";
 import { useBusiness, useUpdates } from "@/hooks/use-data";
 
@@ -39,6 +40,7 @@ const ProfilePage = () => {
         social={profile.social}
         template={profile.template}
       />
+      <SaveButton businessId={profile.id} />
       <section className="mt-6">
         <h2 className="text-base font-bold flex items-center mb-3">
           <Megaphone className="w-5 h-5 mr-2 text-primary" /> Latest offers

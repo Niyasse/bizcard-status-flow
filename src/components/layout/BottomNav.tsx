@@ -1,10 +1,11 @@
 import { NavLink } from "react-router-dom";
-import { Home, Megaphone, LayoutGrid } from "lucide-react";
+import { Home, Megaphone, LayoutGrid, Bookmark } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const tabs = [
   { to: "/", label: "Home", icon: Home, end: true },
   { to: "/status", label: "Updates", icon: Megaphone, end: false },
+  { to: "/saved", label: "Saved", icon: Bookmark, end: false },
   { to: "/companies", label: "Categories", icon: LayoutGrid, end: false },
 ];
 

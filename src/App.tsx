@@ -15,6 +15,7 @@ import AdminPage from "./pages/AdminPage";
 import CompanyListingPage from "./pages/CompanyListingPage";
 import LoginPage from "./pages/LoginPage";
 import CreateProfilePage from "./pages/CreateProfilePage";
+import SavedPage from "./pages/SavedPage";
 import CreateStatusPage from "./pages/CreateStatusPage";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
               <Route path="/login" element={<LoginPage />} />
               <Route path="/companies" element={<CompanyListingPage />} />
               <Route path="/profile/:id" element={<ProfilePage />} />
+              <Route path="/saved" element={<SavedPage />} />
               <Route path="/status" element={<StatusPage />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/admin" element={<AdminPage />} />
