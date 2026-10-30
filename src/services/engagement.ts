@@ -2,7 +2,7 @@
 import type { BusinessUpdate } from "@/types";
 import { detectPlatform, makeReferenceId, type UpdateForm } from "@/lib/engagement";
 
-function store<T>(key: string, fallback: T) {
+export function store<T>(key: string, fallback: T) {
   const listeners = new Set<() => void>();
   let cache: T | null = null;
   const get = (): T => {

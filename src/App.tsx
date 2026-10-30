@@ -18,6 +18,8 @@ import CreateProfilePage from "./pages/CreateProfilePage";
 import SavedPage from "./pages/SavedPage";
 import CreateStatusPage from "./pages/CreateStatusPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import SettingsPage from "./pages/SettingsPage";
+import { RequireRole } from "@/components/RequireRole";
 
 const queryClient = new QueryClient();
 
@@ -36,12 +38,13 @@ const App = () => (
               <Route path="/profile/:id" element={<ProfilePage />} />
               <Route path="/saved" element={<SavedPage />} />
               <Route path="/status" element={<StatusPage />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/admin" element={<AdminPage />} />
-              <Route path="/create-profile" element={<CreateProfilePage />} />
-              <Route path="/edit-profile" element={<CreateProfilePage />} />
-              <Route path="/create-status" element={<CreateStatusPage />} />
+              <Route path="/dashboard" element={<RequireRole roles={["business"]}><Dashboard /></RequireRole>} />
+              <Route path="/admin" element={<RequireRole roles={["admin"]}><AdminPage /></RequireRole>} />
+              <Route path="/create-profile" element={<RequireRole roles={["business"]}><CreateProfilePage /></RequireRole>} />
+              <Route path="/edit-profile" element={<RequireRole roles={["business"]}><CreateProfilePage /></RequireRole>} />
+              <Route path="/create-status" element={<RequireRole roles={["business"]}><CreateStatusPage /></RequireRole>} />
               <Route path="/notifications" element={<NotificationsPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

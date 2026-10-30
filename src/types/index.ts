@@ -95,6 +95,7 @@ export interface AppUser {
   id: ID;
   email: string;
   name: string;
+  phone?: string;
   userType: UserType;
   businessId?: ID;
   savedCardIds?: ID[];
@@ -106,4 +107,17 @@ export interface BusinessFilter {
   districtId?: ID;
   localityId?: ID;
   search?: string;
+}
+
+/** Admin moderation state of a business listing. */
+export type ListingStatus = "pending" | "approved" | "rejected" | "hidden";
+
+/** Customer report about a listing, reviewed by admin. */
+export interface Report {
+  id: ID;
+  businessId: ID;
+  reason: string;
+  reporter: string;
+  createdAt: string;
+  status: "open" | "resolved" | "dismissed";
 }
