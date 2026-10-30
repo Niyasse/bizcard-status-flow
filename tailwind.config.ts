@@ -40,6 +40,10 @@ export default {
 					DEFAULT: 'hsl(var(--muted))',
 					foreground: 'hsl(var(--muted-foreground))'
 				},
+				brand: {
+					DEFAULT: 'hsl(var(--brand))',
+					accent: 'hsl(var(--brand-accent))'
+				},
 				accent: {
 					DEFAULT: 'hsl(var(--accent))',
 					foreground: 'hsl(var(--accent-foreground))'
@@ -63,10 +67,10 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				whatsapp: {
-					green: '#128C7E',
-					lightGreen: '#25D366',
+					green: 'hsl(var(--brand))',
+					lightGreen: 'hsl(var(--brand-accent))',
 					blue: '#34B7F1',
-					light: '#F0F2F5',
+					light: 'hsl(var(--background))',
 					cardFront: '#FFFFFF',
 					cardBack: '#E9EDF5',
 					text: '#1C1E21'

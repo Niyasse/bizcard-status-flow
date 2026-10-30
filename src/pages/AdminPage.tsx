@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
-import { companyProfiles, statusUpdates } from "@/data/mockData";
+import { useBusinesses, useUpdates } from "@/hooks/use-data";
 import { 
   ArrowLeft, 
   Shield, 
@@ -18,6 +18,8 @@ const AdminPage = () => {
   // State for different tabs in admin interface
   const [activeTab, setActiveTab] = useState<"accounts" | "statuses" | "reports">("accounts");
   
+  const { data: companyProfiles = [] } = useBusinesses();
+  const { data: statusUpdates = [] } = useUpdates();
   // Mock data for accounts (based on company profiles)
   const accounts = companyProfiles.map(profile => ({
     ...profile,
@@ -232,15 +234,6 @@ const AdminPage = () => {
                     <div className="mt-3 bg-gray-50 p-3 rounded-md">
                       <p className="text-gray-700">{status.content}</p>
                       
-                      {status.imageUrl && (
-                        <div className="mt-2">
-                          <img 
-                            src={status.imageUrl} 
-                            alt="Status" 
-                            className="w-full max-h-40 object-cover rounded-md"
-                          />
-                        </div>
-                      )}
                       
                       {status.link && (
                         <div className="mt-2 text-sm">
