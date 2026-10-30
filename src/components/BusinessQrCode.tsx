@@ -2,12 +2,12 @@ import { useRef } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { profileUrl } from "@/components/BusinessCard";
+import { qrLink } from "@/lib/engagement";
 
 /** Scannable QR linking to the business profile, downloadable as PNG. */
 export function BusinessQrCode({ id, name }: { id: string; name: string }) {
   const wrap = useRef<HTMLDivElement>(null);
-  const url = profileUrl(id);
+  const url = qrLink(window.location.origin, id);
   const download = () => {
     const canvas = wrap.current?.querySelector("canvas");
     if (!canvas) return;

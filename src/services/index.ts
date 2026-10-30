@@ -2,6 +2,8 @@
 // Every function is async so the mock implementation can later be swapped for backend calls
 // without changing any component.
 import * as db from "@/data/mockData";
+import { ownUpdateService } from "./engagement";
+export * from "./engagement";
 import type {
   Business, BusinessFilter, BusinessUpdate, CardTemplate, Category, District, Locality, ServiceProfessional,
 } from "@/types";
@@ -69,8 +71,14 @@ export const professionalService = {
 };
 
 export const updateService = {
-  list: (companyId?: string): Promise<BusinessUpdate[]> =>
-    delay(companyId ? db.updates.filter((u) => u.companyId === companyId) : db.updates),
+  /** Active offers (mock + owner's own), newest first. */
+  list: (companyId?: string): Promise<BusinessUpdate[]> => {
+    const now = Date.now();
+    const all = [...ownUpdateService.list(), ...db.updates]
+      .filter((u) => new Date(u.expiresAt).getTime() > now && (!companyId || u.companyId === companyId))
+      .sort((a, b) => b.postedAt.localeCompare(a.postedAt));
+    return delay(all);
+  },
 };
 
 export const templateService = {

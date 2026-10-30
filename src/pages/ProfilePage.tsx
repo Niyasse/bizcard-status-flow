@@ -1,4 +1,6 @@
-import { useParams, Link } from "react-router-dom";
+import { useEffect, useRef } from "react";
+import { useParams, Link, useSearchParams } from "react-router-dom";
+import { trackingService } from "@/services";
 import { Megaphone } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -11,6 +13,15 @@ const ProfilePage = () => {
   const { id } = useParams<{ id: string }>();
   const { data: profile, isLoading } = useBusiness(id);
   const { data: updates = [] } = useUpdates(id);
+  const [params] = useSearchParams();
+  const fromQr = params.get("src") === "qr";
+  const tracked = useRef<string | null>(null);
+  useEffect(() => {
+    if (!id || tracked.current === id) return;
+    tracked.current = id;
+    trackingService.view(id);
+    if (fromQr) trackingService.qrVisit(id);
+  }, [id, fromQr]);
 
   if (isLoading) return <AppShell><p className="text-center text-muted-foreground py-8">Loading…</p></AppShell>;
 

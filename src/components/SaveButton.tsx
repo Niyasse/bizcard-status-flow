@@ -1,12 +1,13 @@
-import { Bookmark, BookmarkCheck, Bell, BellOff } from "lucide-react";
-import { useWallet } from "@/hooks/use-data";
-import { walletService } from "@/services";
+import { Bookmark, BookmarkCheck, Bell, BellOff, BellRing } from "lucide-react";
+import { usePrefs, useWallet } from "@/hooks/use-data";
+import { prefsService, walletService } from "@/services";
 import { cn } from "@/lib/utils";
 
 export function SaveButton({ businessId, className }: { businessId: string; className?: string }) {
   const { savedIds, mutedIds } = useWallet();
   const saved = savedIds.includes(businessId);
   const muted = mutedIds.includes(businessId);
+  const alertsOn = !usePrefs().alertsOffIds.includes(businessId);
   return (
     <div className={cn("flex gap-2", className)}>
       <button
@@ -29,6 +30,18 @@ export function SaveButton({ businessId, className }: { businessId: string; clas
         >
           {muted ? <BellOff className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
           {muted ? "Muted" : "Mute"}
+        </button>
+      )}
+      {saved && !muted && (
+        <button
+          type="button"
+          aria-label={alertsOn ? "Turn alerts off" : "Turn alerts on"}
+          aria-pressed={alertsOn}
+          onClick={() => prefsService.toggleAlerts(businessId)}
+          className={cn("h-10 px-3 rounded-md border text-sm flex items-center gap-1.5",
+            alertsOn ? "bg-primary/10 text-primary border-primary/30" : "bg-card text-muted-foreground")}
+        >
+          <BellRing className="w-4 h-4" />{alertsOn ? "Alerts on" : "Alerts off"}
         </button>
       )}
     </div>
