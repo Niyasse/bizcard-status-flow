@@ -184,3 +184,8 @@
 .slide-in {
   animation: slideIn 0.4s ease-out;
 }
+
+@layer utilities {
+  .no-scrollbar { scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+}

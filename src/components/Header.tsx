@@ -1,7 +1,6 @@
 
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ModeToggle } from "./ModeToggle";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -26,7 +25,6 @@ export const Header = () => {
           <span className="font-bold text-lg">Bizapp</span>
         </Link>
         <div className="flex items-center gap-2">
-          <ModeToggle />
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

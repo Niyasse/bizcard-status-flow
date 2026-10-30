@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { BusinessCard } from "@/components/BusinessCard";
-import { cardTemplates } from "@/data/mockData";
+import { useTemplates } from "@/hooks/use-data";
 import { 
   ArrowLeft, 
   Edit, 
