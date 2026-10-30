@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
-import { companyProfiles, statusUpdates } from "@/data/mockData";
+import { useCatalog } from "@/hooks/use-data";
 import { 
   ArrowLeft, 
   Shield, 
@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 const AdminPage = () => {
+  const { businesses: companyProfiles, updates: statusUpdates } = useCatalog();
   // State for different tabs in admin interface
   const [activeTab, setActiveTab] = useState<"accounts" | "statuses" | "reports">("accounts");
   

@@ -16,6 +16,9 @@ import CompanyListingPage from "./pages/CompanyListingPage";
 import LoginPage from "./pages/LoginPage";
 import CreateProfilePage from "./pages/CreateProfilePage";
 import CreateStatusPage from "./pages/CreateStatusPage";
+import { CustomerProvider } from "@/contexts/CustomerContext";
+import CategoriesPage from "./pages/CategoriesPage";
+import MyCardsPage from "./pages/MyCardsPage";
 
 const queryClient = new QueryClient();
 
@@ -27,10 +30,13 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <CustomerProvider>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/companies" element={<CompanyListingPage />} />
+              <Route path="/categories" element={<CategoriesPage />} />
+              <Route path="/my-cards" element={<MyCardsPage />} />
               <Route path="/profile/:id" element={<ProfilePage />} />
               <Route path="/status" element={<StatusPage />} />
               <Route path="/dashboard" element={<Dashboard />} />
@@ -39,6 +45,7 @@ const App = () => (
               <Route path="/create-status" element={<CreateStatusPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            </CustomerProvider>
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
