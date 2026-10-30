@@ -234,15 +234,6 @@ const AdminPage = () => {
                     <div className="mt-3 bg-gray-50 p-3 rounded-md">
                       <p className="text-gray-700">{status.content}</p>
                       
-                      {status.imageUrl && (
-                        <div className="mt-2">
-                          <img 
-                            src={status.imageUrl} 
-                            alt="Status" 
-                            className="w-full max-h-40 object-cover rounded-md"
-                          />
-                        </div>
-                      )}
                       
                       {status.link && (
                         <div className="mt-2 text-sm">
