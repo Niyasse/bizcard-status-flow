@@ -1,33 +1,51 @@
-import { Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Business } from "@/types";
 
-export function ProfileList({ profiles }: { profiles: Business[] }) {
-  return (
-    <div className="bg-card rounded-md shadow-sm overflow-hidden divide-y">
-      {profiles.length > 0 ? (
-        profiles.map((p) => (
+export type ListView = "list" | "grid";
+
+export function ProfileList({ profiles, view = "list" }: { profiles: Business[]; view?: ListView }) {
+  if (!profiles.length) {
+    return (
+      <div className="bg-card rounded-md shadow-sm py-8 text-center text-muted-foreground">
+        No businesses found here yet
+      </div>
+    );
+  }
+
+  if (view === "grid") {
+    return (
+      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+        {profiles.map((p) => (
           <Link
             to={`/profile/${p.id}`}
             key={p.id}
-            className="flex items-center gap-3 px-3 sm:px-4 py-3 hover:bg-muted/60 transition"
+            className="bg-card rounded-lg shadow-sm p-2 flex flex-col items-center text-center hover:bg-muted/60 transition"
           >
-            <div className={p.hasNewStatus ? "status-ring p-0.5" : ""}>
-              <img src={p.logo} alt={p.name} className="w-12 h-12 rounded-full object-cover" />
+            <div className={p.hasNewStatus ? "status-ring p-0.5 mb-1" : "mb-1"}>
+              <img src={p.logo} alt={p.name} className="w-11 h-11 rounded-full object-cover" />
             </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-foreground truncate">{p.name}</h3>
-              <p className="text-sm text-muted-foreground truncate">{p.tagline}</p>
-            </div>
-            <span className="flex items-center text-xs text-muted-foreground shrink-0">
-              <Clock className="h-3 w-3 mr-1" />
-              {p.lastUpdated}
-            </span>
+            <h3 className="text-xs font-medium text-foreground line-clamp-2 leading-tight">{p.name}</h3>
           </Link>
-        ))
-      ) : (
-        <div className="py-8 text-center text-muted-foreground">No businesses found here yet</div>
-      )}
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-card rounded-md shadow-sm overflow-hidden divide-y">
+      {profiles.map((p) => (
+        <Link
+          to={`/profile/${p.id}`}
+          key={p.id}
+          className="flex items-center gap-3 px-3 py-2 hover:bg-muted/60 transition"
+        >
+          <div className={p.hasNewStatus ? "status-ring p-0.5" : ""}>
+            <img src={p.logo} alt={p.name} className="w-9 h-9 rounded-full object-cover" />
+          </div>
+          <h3 className="flex-1 min-w-0 text-sm font-medium text-foreground truncate">{p.name}</h3>
+          <span className="text-[11px] text-muted-foreground shrink-0">{p.lastUpdated}</span>
+        </Link>
+      ))}
     </div>
   );
 }
