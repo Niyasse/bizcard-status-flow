@@ -1,15 +1,17 @@
 import { NavLink } from "react-router-dom";
 import { Compass, MessageSquare, LayoutGrid, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage, type TKey } from "@/lib/i18n";
 
 const tabs = [
-  { to: "/", label: "Discover", icon: Compass, end: true },
-  { to: "/companies", label: "Categories", icon: LayoutGrid, end: false },
-  { to: "/saved", label: "My Cards", icon: Wallet, end: false },
-  { to: "/status", label: "Updates", icon: MessageSquare, end: false },
-];
+  { to: "/", label: "discover", icon: Compass, end: true },
+  { to: "/companies", label: "categories", icon: LayoutGrid, end: false },
+  { to: "/saved", label: "myCards", icon: Wallet, end: false },
+  { to: "/status", label: "updates", icon: MessageSquare, end: false },
+] as const satisfies readonly { label: TKey; [k: string]: unknown }[];
 
 export function BottomNav() {
+  const { t } = useLanguage();
   return (
     <nav
       aria-label="Main"
@@ -31,9 +33,9 @@ export function BottomNav() {
             {({ isActive }) => (
               <>
                 <span className={cn("rounded-full px-4 py-1", isActive && "bg-primary/10")}>
-                  <Icon className="h-5 w-5" />
+                  <Icon className="h-5 w-5" aria-hidden />
                 </span>
-                {label}
+                {t(label)}
               </>
             )}
           </NavLink>
