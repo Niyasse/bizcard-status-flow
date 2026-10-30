@@ -18,6 +18,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { data: cardTemplates = [] } = useTemplates();
   
   // Mock user profile for the dashboard
   const [userProfile, setUserProfile] = useState({
