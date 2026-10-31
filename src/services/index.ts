@@ -13,16 +13,21 @@ import type {
 
 const delay = <T,>(v: T) => Promise.resolve(structuredClone(v));
 
+const withTimeout = <T,>(p: PromiseLike<T>, ms = 2000): Promise<T> =>
+  Promise.race([
+    Promise.resolve(p),
+    new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Supabase request timeout")), ms)),
+  ]);
+
 export const ALL = "All";
 
 export const locationService = {
   getDistricts: async (): Promise<District[]> => {
     if (isSupabaseConfigured()) {
       try {
-        const { data, error } = await supabase
-          .from("districts")
-          .select("id, name")
-          .order("name");
+        const { data, error } = await withTimeout(
+          supabase.from("districts").select("id, name").order("name")
+        );
         if (!error && data && data.length > 0) {
           return data;
         }
@@ -40,7 +45,7 @@ export const locationService = {
         if (districtId) {
           q = q.eq("district_id", districtId);
         }
-        const { data, error } = await q;
+        const { data, error } = await withTimeout(q);
         if (!error && data && data.length > 0) {
           return data.map((l: any) => ({
             id: l.id,
@@ -60,10 +65,9 @@ export const categoryService = {
   getCategories: async (): Promise<Category[]> => {
     if (isSupabaseConfigured()) {
       try {
-        const { data, error } = await supabase
-          .from("categories")
-          .select("id, name, name_ml, kind")
-          .order("name");
+        const { data, error } = await withTimeout(
+          supabase.from("categories").select("id, name, name_ml, kind").order("name")
+        );
         if (!error && data && data.length > 0) {
           return data.map((c: any) => ({
             id: c.id,
@@ -184,7 +188,7 @@ export const businessService = {
           q = q.range(from, to);
         }
 
-        const { data, error } = await q;
+        const { data, error } = await withTimeout(q);
         if (!error && data) {
           let list = data.map(mapRowToBusiness);
           if (filter?.category && filter.category !== ALL) {
@@ -428,7 +432,7 @@ export const updateService = {
           q = q.eq("business_id", companyId);
         }
 
-        const { data, error } = await q;
+        const { data, error } = await withTimeout(q);
         if (!error && data) {
           return data.map((u: any) => ({
             id: u.id,
