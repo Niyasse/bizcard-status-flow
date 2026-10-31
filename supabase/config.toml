@@ -1,0 +1,45 @@
+# Supabase project configuration
+# Used by the Supabase CLI (supabase link, supabase db push, etc.)
+# https://supabase.com/docs/guides/cli/config
+
+[api]
+# Local dev port
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[studio]
+port = 54323
+api_url = "http://localhost"
+
+[inbucket]
+port = 54324
+
+[storage]
+file_size_limit = "1MiB"        # matches MAX_LOGO_BYTES in src/lib/validation.ts
+
+[auth]
+site_url = "http://localhost:8080"
+additional_redirect_urls = ["https://bizapp.in"]
+jwt_expiry = 3600
+enable_signup = true
+# Phone OTP — configure SMS provider in Supabase dashboard (Twilio / MSG91)
+# Do NOT store provider credentials here; set them via dashboard env vars.
+[auth.sms]
+enable_phone_signup = true
+enable_phone_autoconfirm = false   # prod: always verify OTP
+# Test mode only:
+# enable_phone_autoconfirm = true  # uncomment for local dev without SMS
+
+[auth.email]
+enable_signup = true
+enable_confirmations = false       # set true in production
+
+[functions]
+# Edge functions go in supabase/functions/
