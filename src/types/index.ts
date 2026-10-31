@@ -107,6 +107,8 @@ export interface BusinessFilter {
   districtId?: ID;
   localityId?: ID;
   search?: string;
+  page?: number;
+  pageSize?: number;
 }
 
 /** Admin moderation state of a business listing. */

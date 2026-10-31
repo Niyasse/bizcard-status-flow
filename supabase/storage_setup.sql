@@ -20,3 +20,4 @@ VALUES (
 ON CONFLICT (id) DO UPDATE SET
   file_size_limit     = EXCLUDED.file_size_limit,
   allowed_mime_types  = EXCLUDED.allowed_mime_types;
+

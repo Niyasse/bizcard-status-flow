@@ -1,4 +1,11 @@
-# Logs
+# Supabase & Environment
+.env
+.env.*
+!.env.example
+supabase/.temp/
+test_pg_migrations.mjs
+check_ext.mjs
+
 logs
 *.log
 npm-debug.log*

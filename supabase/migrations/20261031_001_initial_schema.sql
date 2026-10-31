@@ -18,7 +18,6 @@
 -- 0. Extensions
 -- ---------------------------------------------------------------------------
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";   -- gen_random_uuid() on older PG
-CREATE EXTENSION IF NOT EXISTS "unaccent";   -- accent-insensitive FTS
 
 -- ---------------------------------------------------------------------------
 -- 1. Reference / Seed Tables (public read-only after seeding)
@@ -104,10 +103,10 @@ CREATE TABLE IF NOT EXISTS businesses (
   -- Uses 'simple' config (no stemming) to support Malayalam tokens unchanged.
   fts          TSVECTOR    GENERATED ALWAYS AS (
                   to_tsvector('simple',
-                    unaccent(coalesce(name,''))    || ' ' ||
-                    coalesce(name_ml,'')           || ' ' ||
-                    unaccent(coalesce(tagline,'')) || ' ' ||
-                    unaccent(coalesce(address,''))
+                    coalesce(name,'')    || ' ' ||
+                    coalesce(name_ml,'') || ' ' ||
+                    coalesce(tagline,'') || ' ' ||
+                    coalesce(address,'')
                   )
                 ) STORED
 );
@@ -244,3 +243,4 @@ CREATE TABLE IF NOT EXISTS professional_categories (
   category_id     TEXT NOT NULL REFERENCES categories(id)    ON DELETE CASCADE,
   PRIMARY KEY (professional_id, category_id)
 );
+

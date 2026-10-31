@@ -272,7 +272,7 @@ INSERT INTO public.business_updates
    posted_at, expires_at)
 VALUES
   (
-    'u0000001-0001-0001-0001-000000000001',
+    '11111111-0001-0001-0001-000000000001',
     'b1a2c3d4-0001-0001-0001-000000000001',
     'Christmas plum cake pre-orders open! 15% off on 1 kg cakes booked before Dec 15.',
     'https://instagram.com', 'See cakes on Instagram', 'instagram',
@@ -280,7 +280,7 @@ VALUES
     NOW() + INTERVAL '30 days'
   ),
   (
-    'u0000001-0002-0002-0002-000000000002',
+    '11111111-0002-0002-0002-000000000002',
     'b1a2c3d4-0002-0002-0002-000000000002',
     'Fresh Kozhikode sardines & mackerel in today. Free home delivery above ₹500 on Mavoor Road.',
     NULL, NULL, NULL,
@@ -288,7 +288,7 @@ VALUES
     NOW() + INTERVAL '28 days'
   ),
   (
-    'u0000001-0003-0003-0003-000000000003',
+    '11111111-0003-0003-0003-000000000003',
     'b1a2c3d4-0003-0003-0003-000000000003',
     'Onam kasavu collection is here — flat 20% off on set mundu this week.',
     'https://seemattiweaves.in', 'Browse collection', 'website',
@@ -296,7 +296,7 @@ VALUES
     NOW() + INTERVAL '25 days'
   ),
   (
-    'u0000001-0005-0005-0005-000000000005',
+    '11111111-0005-0005-0005-000000000005',
     'b1a2c3d4-0005-0005-0005-000000000005',
     'Munnar 2N/3D family package from ₹6,999 per person. Limited seats for the long weekend.',
     'https://facebook.com', 'Package details on Facebook', 'facebook',
@@ -304,7 +304,7 @@ VALUES
     NOW() + INTERVAL '20 days'
   ),
   (
-    'u0000001-0008-0008-0008-000000000008',
+    '11111111-0008-0008-0008-000000000008',
     'b1a2c3d4-0008-0008-0008-000000000008',
     'Karkidaka chikitsa bookings open. Free consultation on Saturdays.',
     NULL, NULL, NULL,
@@ -320,19 +320,19 @@ INSERT INTO public.professionals
   (id, name, profession, photo, phone, whatsapp, district_id, locality_id, experience_years)
 VALUES
   (
-    'sp000001-0001-0001-0001-000000000001',
+    '22222222-0001-0001-0001-000000000001',
     'Anil Kumar', 'Electrician', NULL,
     '+919846011223', '919846011223',
     'ekm', 'kakkanad', 12
   ),
   (
-    'sp000001-0002-0002-0002-000000000002',
+    '22222222-0002-0002-0002-000000000002',
     'Shibu Thomas', 'Plumber', NULL,
     '+919447033221', '919447033221',
     'ktm', 'kumarakom', 8
   ),
   (
-    'sp000001-0003-0003-0003-000000000003',
+    '22222222-0003-0003-0003-000000000003',
     'Dr. Lakshmi Menon', 'Ayurveda Physician', NULL,
     '+919048055443', '919048055443',
     'tsr', 'swaraj', 15
@@ -340,7 +340,8 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.professional_categories (professional_id, category_id) VALUES
-  ('sp000001-0001-0001-0001-000000000001', 'electrician'),
-  ('sp000001-0002-0002-0002-000000000002', 'plumber'),
-  ('sp000001-0003-0003-0003-000000000003', 'ayurveda')
+  ('22222222-0001-0001-0001-000000000001', 'electrician'),
+  ('22222222-0002-0002-0002-000000000002', 'plumber'),
+  ('22222222-0003-0003-0003-000000000003', 'ayurveda')
 ON CONFLICT DO NOTHING;
+

@@ -221,3 +221,4 @@ DROP TRIGGER IF EXISTS trg_validate_logo_path ON public.businesses;
 CREATE TRIGGER trg_validate_logo_path
   BEFORE INSERT OR UPDATE OF logo ON public.businesses
   FOR EACH ROW EXECUTE FUNCTION public.validate_logo_path();
+

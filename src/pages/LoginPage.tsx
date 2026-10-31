@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { homeFor, isValidPhone, MOCK_OTP, validateSignup } from "@/lib/auth";
+import { homeFor, isValidPhone, validateSignup } from "@/lib/auth";
 import { userService } from "@/services/admin";
+import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 
 type Step = "form" | "otp";
 
@@ -28,15 +29,36 @@ const LoginPage = () => {
 
   const go = (r: UserType) => navigate(params.get("next") || homeFor(r), { replace: true });
 
-  const requestOtp = (e: React.FormEvent) => {
+  const requestOtp = async (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanPhone = phone.replace(/\D/g, "").slice(-10);
     const errs: Record<string, string> = mode === "signup"
       ? { ...validateSignup({ name, phone, email, role }) } as Record<string, string>
       : isValidPhone(phone) ? {} : { phone: "Enter a 10-digit mobile number" };
-    if (mode === "login" && !errs.phone && !userService.findByPhone(phone.replace(/\D/g, "").slice(-10)))
+
+    if (!isSupabaseConfigured() && mode === "login" && !errs.phone && !userService.findByPhone(cleanPhone)) {
       errs.phone = "No account with this number. Sign up instead.";
+    }
+
     setErrors(errs);
-    if (Object.keys(errs).length === 0) { setOtp(""); setStep("otp"); }
+    if (Object.keys(errs).length === 0) {
+      if (isSupabaseConfigured()) {
+        try {
+          const { error } = await supabase.auth.signInWithOtp({
+            phone: `+91${cleanPhone}`,
+          });
+          if (error) {
+            setErrors({ phone: error.message });
+            return;
+          }
+        } catch (err: any) {
+          setErrors({ phone: err.message || "Failed to send OTP" });
+          return;
+        }
+      }
+      setOtp("");
+      setStep("otp");
+    }
   };
 
   const confirmOtp = async (e: React.FormEvent) => {
@@ -44,7 +66,14 @@ const LoginPage = () => {
     setBusy(true);
     const u = mode === "signup" ? await signup({ name, phone, email, role }, otp) : await loginWithOtp(phone, otp);
     setBusy(false);
-    if (!u) { setErrors({ otp: "Wrong code. For this demo use 123456." }); return; }
+    if (!u) {
+      setErrors({
+        otp: isSupabaseConfigured()
+          ? "Invalid or expired OTP code. Please try again."
+          : "Wrong code. For this demo use 123456.",
+      });
+      return;
+    }
     go(u.userType);
   };
 
@@ -100,32 +129,33 @@ const LoginPage = () => {
                   <Button type="submit" className="w-full min-h-11">Send OTP</Button>
                 </form>
               ) : (
-                <form onSubmit={confirmOtp} className="space-y-4 pt-2">
+                <form onSubmit={confirmOtp} className="space-y-4 pt-2" noValidate>
                   <p className="text-sm text-muted-foreground">
-                    Enter the 6-digit code sent to {phone}. Demo code: <strong className="text-foreground">{MOCK_OTP}</strong>
+                    Code sent to <span className="font-medium text-foreground">{phone}</span>.{" "}
+                    <button type="button" onClick={() => setStep("form")} className="text-primary underline">Change</button>
                   </p>
-                  {field("otp", "OTP code",
-                    <Input id="otp" className="h-11 tracking-[0.5em] text-center text-lg" inputMode="numeric" maxLength={6}
-                      autoComplete="one-time-code" value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))} aria-invalid={!!errors.otp} />)}
-                  <Button type="submit" className="w-full min-h-11" disabled={busy || otp.length !== 6}>
-                    {busy ? "Verifying…" : "Verify & continue"}
-                  </Button>
-                  <Button type="button" variant="ghost" className="w-full min-h-11" onClick={() => setStep("form")}>Change number</Button>
+                  {field("otp", "6-digit code",
+                    <Input id="otp" className="h-11 text-center tracking-widest text-lg font-mono" inputMode="numeric" maxLength={6}
+                      value={otp} onChange={(e) => setOtp(e.target.value)} autoFocus aria-invalid={!!errors.otp} />)}
+                  <Button type="submit" className="w-full min-h-11" disabled={busy}>{busy ? "Verifying…" : "Verify & continue"}</Button>
                 </form>
               )}
             </TabsContent>
           ))}
         </Tabs>
 
-        <div className="mt-6 border-t pt-4">
-          <p className="text-xs text-muted-foreground text-center mb-2">Demo accounts (no OTP needed)</p>
-          <div className="grid grid-cols-3 gap-2">
-            <Button variant="outline" className="min-h-11 text-xs" onClick={() => demo("client", "client@b.com")}>Customer</Button>
-            <Button variant="outline" className="min-h-11 text-xs" onClick={() => demo("business", "business@b.com")}>Business</Button>
-            <Button variant="outline" className="min-h-11 text-xs" onClick={() => demo("admin", "admin@b.com")}>Admin</Button>
+        <div className="mt-6 pt-5 border-t text-center space-y-2">
+          <p className="text-xs text-muted-foreground font-medium">Demo accounts (click to sign in)</p>
+          <div className="flex flex-wrap gap-2 justify-center">
+            <Button type="button" variant="outline" size="sm" onClick={() => demo("client", "client@b.com")}>Customer</Button>
+            <Button type="button" variant="outline" size="sm" onClick={() => demo("business", "business@b.com")}>Owner</Button>
+            <Button type="button" variant="outline" size="sm" onClick={() => demo("admin", "admin@b.com")}>Admin</Button>
           </div>
         </div>
-        <p className="text-center mt-4"><Link to="/" className="text-sm text-primary underline">Continue without signing in</Link></p>
+
+        <div className="mt-4 text-center">
+          <Link to="/" className="text-xs text-muted-foreground hover:underline">← Back to discovery</Link>
+        </div>
       </div>
     </AppShell>
   );

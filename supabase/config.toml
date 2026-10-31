@@ -18,7 +18,7 @@ major_version = 15
 port = 54323
 api_url = "http://localhost"
 
-[inbucket]
+[local_smtp]
 port = 54324
 
 [storage]
@@ -43,3 +43,4 @@ enable_confirmations = false       # set true in production
 
 [functions]
 # Edge functions go in supabase/functions/
+

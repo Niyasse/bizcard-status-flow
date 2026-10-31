@@ -485,3 +485,4 @@ CREATE POLICY "logos_admin_all"
   ON storage.objects FOR ALL
   USING  (bucket_id = 'logos' AND public.has_role(auth.uid(), 'admin'))
   WITH CHECK (bucket_id = 'logos' AND public.has_role(auth.uid(), 'admin'));
+

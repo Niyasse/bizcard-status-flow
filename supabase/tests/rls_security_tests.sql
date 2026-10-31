@@ -372,3 +372,4 @@ BEGIN
 
   RAISE NOTICE '--- Suite 9 (seed integrity) complete ---';
 END $$;
+
