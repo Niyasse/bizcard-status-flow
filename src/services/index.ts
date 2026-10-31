@@ -13,7 +13,7 @@ import type {
 
 const delay = <T,>(v: T) => Promise.resolve(structuredClone(v));
 
-const withTimeout = <T,>(p: PromiseLike<T>, ms = 2000): Promise<T> =>
+const withTimeout = <T,>(p: PromiseLike<T>, ms = 1200): Promise<T> =>
   Promise.race([
     Promise.resolve(p),
     new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Supabase request timeout")), ms)),

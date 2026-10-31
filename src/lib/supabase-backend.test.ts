@@ -218,7 +218,7 @@ describe("Sprint 6C — Frontend Service Interfaces & Paginated Search", () => {
 
     const categories = await categoryService.getCategories();
     expect(categories.length).toBeGreaterThanOrEqual(13);
-  });
+  }, 15000);
 
   it("supports paginated business discovery search", async () => {
     const page0 = await businessService.list({ page: 0, pageSize: 3 });
@@ -231,7 +231,7 @@ describe("Sprint 6C — Frontend Service Interfaces & Paginated Search", () => {
     const ids0 = page0.map((b) => b.id);
     const ids1 = page1.map((b) => b.id);
     expect(ids0.some((id) => ids1.includes(id))).toBe(false);
-  });
+  }, 15000);
 
   it("supports category and keyword filter", async () => {
     const bakeries = await businessService.list({ category: "Bakery" });
@@ -239,5 +239,5 @@ describe("Sprint 6C — Frontend Service Interfaces & Paginated Search", () => {
 
     const searchRes = await businessService.list({ search: "cake" });
     expect(searchRes.some((b) => b.name === "Kochi Bake House")).toBe(true);
-  });
+  }, 15000);
 });

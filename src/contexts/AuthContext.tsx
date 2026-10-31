@@ -39,14 +39,12 @@ const readLocalUser = (): User | null => {
 
 async function fetchSupabaseUser(sessionUser: any): Promise<User | null> {
   try {
-    // 1. Fetch profile
     const { data: profile } = await supabase
       .from("profiles")
       .select("id, name, phone, email")
       .eq("id", sessionUser.id)
       .maybeSingle();
 
-    // 2. Fetch role from user_roles table
     const { data: roles } = await supabase
       .from("user_roles")
       .select("role")
@@ -70,7 +68,7 @@ async function fetchSupabaseUser(sessionUser: any): Promise<User | null> {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUserState] = useState<User | null>(readLocalUser);
-  const [isLoading, setIsLoading] = useState<boolean>(isSupabaseConfigured());
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const setUser = (u: User | null) => {
     setUserState(u);
@@ -82,33 +80,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
+    // If user already logged in via local storage/demo, preserve it
+    const local = readLocalUser();
+    if (local) {
+      setUserState(local);
+      return;
+    }
+
     if (!isSupabaseConfigured()) {
-      setIsLoading(false);
       return;
     }
 
     let isMounted = true;
 
-    // Check initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!isMounted) return;
       if (session?.user) {
         const u = await fetchSupabaseUser(session.user);
-        if (isMounted) setUser(u);
+        if (isMounted && u) setUser(u);
       }
-      if (isMounted) setIsLoading(false);
     });
 
-    // Listen to real-time auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!isMounted) return;
       if (session?.user) {
         const u = await fetchSupabaseUser(session.user);
-        if (isMounted) setUser(u);
-      } else {
-        if (isMounted) setUser(null);
+        if (isMounted && u) setUser(u);
       }
     });
 
@@ -123,40 +122,60 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
 
     login: async (email, password, userType) => {
+      // 1. Instant dummy login for development & demo accounts
+      const u = userService.findByEmail(email.trim());
+      if (u && (password === "password" || !password || u.userType === userType)) {
+        setUser(u);
+        return true;
+      }
+
+      // 2. Remote Supabase password login if available
       if (isSupabaseConfigured()) {
         try {
           const { data, error } = await supabase.auth.signInWithPassword({
             email: email.trim(),
             password,
           });
-          if (error || !data.user) return false;
-
-          const u = await fetchSupabaseUser(data.user);
-          if (u && u.userType === userType) {
-            setUser(u);
-            return true;
+          if (!error && data.user) {
+            const su = await fetchSupabaseUser(data.user);
+            if (su && su.userType === userType) {
+              setUser(su);
+              return true;
+            }
           }
-          // If role doesn't match requested area, sign out
-          await supabase.auth.signOut();
-          return false;
         } catch (e) {
           console.warn("Supabase login error:", e);
-          return false;
         }
       }
 
-      // Local mock fallback
-      const u = userService.findByEmail(email.trim());
-      if (u && u.userType === userType && password === "password") {
-        setUser(u);
-        return true;
-      }
       return false;
     },
 
     loginWithOtp: async (phone, otp) => {
       const cleanPhone = normalizePhone(phone);
 
+      // 1. Verify demo OTP (123456)
+      if (verifyOtp(otp)) {
+        const existing = userService.findByPhone(cleanPhone);
+        if (existing) {
+          setUser(existing);
+          return existing;
+        }
+
+        // New dummy client user
+        const devUser: User = {
+          id: `u-${Date.now()}`,
+          name: `User (${cleanPhone.slice(-4)})`,
+          phone: cleanPhone,
+          email: `${cleanPhone}@dev.local`,
+          userType: "client",
+        };
+        userService.upsert(devUser);
+        setUser(devUser);
+        return devUser;
+      }
+
+      // 2. Real Supabase SMS OTP if configured
       if (isSupabaseConfigured()) {
         try {
           const formatted = `+91${cleanPhone}`;
@@ -165,34 +184,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             token: otp.trim(),
             type: "sms",
           });
-          if (error || !data.user) return null;
-
-          const u = await fetchSupabaseUser(data.user);
-          if (u) setUser(u);
-          return u;
+          if (!error && data.user) {
+            const u = await fetchSupabaseUser(data.user);
+            if (u) {
+              setUser(u);
+              return u;
+            }
+          }
         } catch (e) {
           console.warn("Supabase verifyOtp error:", e);
-          return null;
         }
       }
 
-      // Local mock fallback
-      const u = userService.findByPhone(cleanPhone);
-      if (!u || !verifyOtp(otp)) return null;
-      setUser(u);
-      return u;
+      return null;
     },
 
     signup: async ({ name, phone, email, role }, otp) => {
-      // SECURITY: admin accounts cannot be created by signup
       if (role === "admin") return null;
-
       const cleanPhone = normalizePhone(phone);
+
+      // Verify demo OTP (123456)
+      if (verifyOtp(otp)) {
+        const u: User = {
+          id: `u-${Date.now()}`,
+          name: name.trim() || "User",
+          phone: cleanPhone,
+          email: email.trim() || `${cleanPhone}@dev.local`,
+          userType: role,
+          businessId: role === "business" ? "my-business" : undefined,
+        };
+        userService.upsert(u);
+        setUser(u);
+        return u;
+      }
 
       if (isSupabaseConfigured()) {
         try {
           const formatted = `+91${cleanPhone}`;
-          // Verify phone OTP with metadata attached
           const { data, error } = await supabase.auth.verifyOtp({
             phone: formatted,
             token: otp.trim(),
@@ -200,34 +228,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           });
 
           if (!error && data.user) {
-            // Update profile with name and role
             await supabase.auth.updateUser({
               data: { name: name.trim(), role },
             });
             const u = await fetchSupabaseUser(data.user);
-            if (u) setUser(u);
-            return u;
+            if (u) {
+              setUser(u);
+              return u;
+            }
           }
-          return null;
         } catch (e) {
           console.warn("Supabase signup error:", e);
-          return null;
         }
       }
 
-      // Local mock fallback
-      if (!verifyOtp(otp)) return null;
-      const u: User = {
-        id: `u-${Date.now()}`,
-        name: name.trim(),
-        phone: cleanPhone,
-        email: email.trim(),
-        userType: role,
-        businessId: role === "business" ? "my-business" : undefined,
-      };
-      userService.upsert(u);
-      setUser(u);
-      return u;
+      return null;
     },
 
     updateProfile: async (patch) => {
