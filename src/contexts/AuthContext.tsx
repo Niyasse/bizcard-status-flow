@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import type { AppUser, UserType } from "@/types";
 import { userService } from "@/services/admin";
+import { walletService } from "@/services";
+import { prefsService } from "@/services/engagement";
 import { normalizePhone, verifyOtp } from "@/lib/auth";
-import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import { isSupabaseConfigured, supabase, isProd } from "@/lib/supabase";
 
 export type { UserType };
 export type User = AppUser;
@@ -74,8 +76,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUserState(u);
     if (u) {
       localStorage.setItem(KEY, JSON.stringify(u));
+      walletService.sync();
+      prefsService.sync();
     } else {
       localStorage.removeItem(KEY);
+      walletService._reset();
+      prefsService._reset();
     }
   };
 
@@ -84,6 +90,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const local = readLocalUser();
     if (local) {
       setUserState(local);
+      walletService.sync();
+      prefsService.sync();
       return;
     }
 
@@ -122,11 +130,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
 
     login: async (email, password, userType) => {
-      // 1. Instant dummy login for development & demo accounts
-      const u = userService.findByEmail(email.trim());
-      if (u && (password === "password" || !password || u.userType === userType)) {
-        setUser(u);
-        return true;
+      // 1. Instant dummy login for development & demo accounts (dev only)
+      if (!isProd) {
+        const u = userService.findByEmail(email.trim());
+        if (u && (password === "password" || !password || u.userType === userType)) {
+          setUser(u);
+          return true;
+        }
       }
 
       // 2. Remote Supabase password login if available
@@ -154,8 +164,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loginWithOtp: async (phone, otp) => {
       const cleanPhone = normalizePhone(phone);
 
-      // 1. Verify demo OTP (123456)
-      if (verifyOtp(otp)) {
+      // 1. Verify demo OTP (123456) in dev mode
+      if (!isProd && verifyOtp(otp)) {
         const existing = userService.findByPhone(cleanPhone);
         if (existing) {
           setUser(existing);
@@ -203,8 +213,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (role === "admin") return null;
       const cleanPhone = normalizePhone(phone);
 
-      // Verify demo OTP (123456)
-      if (verifyOtp(otp)) {
+      // Verify demo OTP (123456) in dev mode
+      if (!isProd && verifyOtp(otp)) {
         const u: User = {
           id: `u-${Date.now()}`,
           name: name.trim() || "User",

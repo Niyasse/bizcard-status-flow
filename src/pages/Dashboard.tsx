@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Edit, Share2, Eye, Plus, QrCode, Megaphone, BarChart3, Bookmark, MessageCircle, ScanLine } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
@@ -6,7 +7,7 @@ import { BusinessCard, profileUrl } from "@/components/BusinessCard";
 import { BusinessQrCode } from "@/components/BusinessQrCode";
 import { Button } from "@/components/ui/button";
 import { useMyBusiness, useOwnUpdates, useTracking, useWallet } from "@/hooks/use-data";
-import { mockBaseline, trackingService, moderationService, MY_BUSINESS_ID } from "@/services";
+import { mockBaseline, trackingService, ownUpdateService, moderationService, MY_BUSINESS_ID } from "@/services";
 import { isActive, MAX_ACTIVE_UPDATES } from "@/lib/engagement";
 import { useToast } from "@/hooks/use-toast";
 
@@ -16,6 +17,13 @@ const Dashboard = () => {
   const track = useTracking();
   const { savedIds } = useWallet();
   const own = useOwnUpdates();
+
+  useEffect(() => {
+    if (b?.id) {
+      trackingService.syncCounts(b.id);
+      ownUpdateService.sync(b.id);
+    }
+  }, [b?.id]);
 
   if (isLoading) return <AppShell><p className="text-center text-muted-foreground py-8">Loading…</p></AppShell>;
 

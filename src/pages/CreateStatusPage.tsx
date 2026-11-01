@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { Pencil, Trash2, Plus, Clock, ExternalLink } from "lucide-react";
@@ -26,6 +26,12 @@ const CreateStatusPage = () => {
   const [form, setForm] = useState<UpdateForm | null>(null);
   const [editingId, setEditingId] = useState<string | undefined>();
   const [errors, setErrors] = useState<UpdateErrors>({});
+
+  useEffect(() => {
+    if (biz?.id) {
+      ownUpdateService.sync(biz.id);
+    }
+  }, [biz?.id]);
 
   if (isLoading) return <AppShell><p className="text-center text-muted-foreground py-8">Loading…</p></AppShell>;
   if (!biz) {

@@ -1,14 +1,14 @@
 // Service layer: the only place UI gets data from.
-// Connects to Supabase when configured, falling back to mock / local data.
+// Connects to Supabase when configured, with mock/local data in development.
 import * as db from "@/data/mockData";
 import { ownUpdateService } from "./engagement";
 export * from "./engagement";
 export * from "./admin";
-import { moderationService } from "./admin";
+import { moderationService, moderationStore } from "./admin";
 import { isPublicListing } from "@/lib/auth";
-import { isSupabaseConfigured, supabase, uploadBusinessLogo } from "@/lib/supabase";
+import { isSupabaseConfigured, supabase, uploadBusinessLogo, isValidUuid, isProd } from "@/lib/supabase";
 import type {
-  Business, BusinessFilter, BusinessUpdate, CardTemplate, Category, District, Locality, ServiceProfessional,
+  Business, BusinessFilter, BusinessUpdate, CardTemplate, Category, District, Locality, ServiceProfessional, ListingStatus,
 } from "@/types";
 
 const delay = <T,>(v: T) => Promise.resolve(structuredClone(v));
@@ -30,11 +30,15 @@ export const locationService = {
         );
         if (!error && data && data.length > 0) {
           return data;
+        } else if (error && isProd) {
+          throw error;
         }
       } catch (e) {
+        if (isProd) throw e;
         console.warn("Supabase getDistricts error, using fallback:", e);
       }
     }
+    if (isProd) throw new Error("Districts unavailable in production.");
     return delay(db.districts);
   },
 
@@ -52,11 +56,15 @@ export const locationService = {
             name: l.name,
             districtId: l.district_id,
           }));
+        } else if (error && isProd) {
+          throw error;
         }
       } catch (e) {
+        if (isProd) throw e;
         console.warn("Supabase getLocalities error, using fallback:", e);
       }
     }
+    if (isProd) throw new Error("Localities unavailable in production.");
     return delay(districtId ? db.localities.filter((l) => l.districtId === districtId) : db.localities);
   },
 };
@@ -75,11 +83,15 @@ export const categoryService = {
             nameMl: c.name_ml ?? undefined,
             kind: c.kind,
           }));
+        } else if (error && isProd) {
+          throw error;
         }
       } catch (e) {
+        if (isProd) throw e;
         console.warn("Supabase getCategories error, using fallback:", e);
       }
     }
+    if (isProd) throw new Error("Categories unavailable in production.");
     return delay(db.categories);
   },
 };
@@ -158,17 +170,18 @@ function mapRowToBusiness(row: any): Business {
 }
 
 export const businessService = {
-  /** Public discovery: approved listings only with optional paginated search. */
+  /** Public discovery: approved listings only with paginated search & joined filters. */
   list: async (filter?: BusinessFilter): Promise<Business[]> => {
     if (isSupabaseConfigured()) {
       try {
+        const hasCategory = Boolean(filter?.category && filter.category !== ALL);
         let q = supabase
           .from("businesses")
           .select(`
             *,
-            business_categories(
+            business_categories${hasCategory ? "!inner" : ""}(
               category_id,
-              categories(id, name, name_ml)
+              categories${hasCategory ? "!inner" : ""}(id, name, name_ml)
             )
           `)
           .eq("status", "approved")
@@ -176,6 +189,10 @@ export const businessService = {
 
         if (filter?.districtId) q = q.eq("district_id", filter.districtId);
         if (filter?.localityId) q = q.eq("locality_id", filter.localityId);
+
+        if (hasCategory) {
+          q = q.eq("business_categories.categories.name", filter!.category);
+        }
 
         if (filter?.search?.trim()) {
           const s = filter.search.trim();
@@ -189,16 +206,20 @@ export const businessService = {
         }
 
         const { data, error } = await withTimeout(q);
-        if (!error && data) {
-          let list = data.map(mapRowToBusiness);
-          if (filter?.category && filter.category !== ALL) {
-            list = list.filter((b) => b.tags.includes(filter.category!));
-          }
-          return list;
+        if (error) {
+          if (isProd) throw error;
+          console.warn("Supabase businessService.list error, using fallback:", error.message);
+        } else if (data) {
+          return data.map(mapRowToBusiness);
         }
       } catch (e) {
+        if (isProd) throw e;
         console.warn("Supabase businessService.list error, using fallback:", e);
       }
+    }
+
+    if (isProd) {
+      throw new Error("Supabase is not configured or failed in production environment.");
     }
 
     return delay(
@@ -225,17 +246,29 @@ export const businessService = {
           .order("created_at", { ascending: false });
 
         if (!error && data) {
+          // Sync moderation store with actual database statuses
+          const statuses: Record<string, ListingStatus> = {};
+          data.forEach((row: any) => {
+            if (row.status) statuses[row.id] = row.status;
+          });
+          const current = moderationStore.get();
+          moderationStore.set({ statuses: { ...current.statuses, ...statuses } });
+
           return data.map(mapRowToBusiness);
+        } else if (error && isProd) {
+          throw error;
         }
       } catch (e) {
+        if (isProd) throw e;
         console.warn("Supabase listAll error, using fallback:", e);
       }
     }
+    if (isProd) return [];
     return delay(allBusinesses());
   },
 
   getById: async (id: string): Promise<Business | null> => {
-    if (isSupabaseConfigured()) {
+    if (isSupabaseConfigured() && isValidUuid(id)) {
       try {
         const { data, error } = await supabase
           .from("businesses")
@@ -251,11 +284,15 @@ export const businessService = {
 
         if (!error && data) {
           return mapRowToBusiness(data);
+        } else if (error && isProd) {
+          throw error;
         }
       } catch (e) {
+        if (isProd) throw e;
         console.warn("Supabase getById error, using fallback:", e);
       }
     }
+    if (isProd) return null;
     return delay(allBusinesses().find((b) => b.id === id) ?? null);
   },
 };
@@ -277,8 +314,6 @@ export const myBusinessService = {
               )
             `)
             .eq("owner_id", user.id)
-            .order("created_at", { ascending: false })
-            .limit(1)
             .maybeSingle();
 
           if (!error && data) {
@@ -286,33 +321,32 @@ export const myBusinessService = {
           }
         }
       } catch (e) {
+        if (isProd) throw e;
         console.warn("Supabase myBusinessService.get error, using fallback:", e);
       }
     }
-    return delay(readMine());
+    if (isProd) return null;
+    const local = readMine();
+    if (local) return delay(local);
+    return delay(db.businesses[0]);
   },
 
-  /** Create or update the owner's business with logo storage support. */
   save: async (input: Omit<Business, "id" | "tags" | "lastUpdated" | "hasNewStatus">): Promise<Business> => {
     if (isSupabaseConfigured()) {
       try {
         const { data: authData } = await supabase.auth.getUser();
         const user = authData?.user;
         if (user) {
-          // Check for existing business for this owner
           const { data: existing } = await supabase
             .from("businesses")
             .select("id, status")
             .eq("owner_id", user.id)
             .maybeSingle();
 
-          const bizId = existing?.id || crypto.randomUUID();
+          const bizId = existing?.id || (crypto.randomUUID ? crypto.randomUUID() : undefined);
+          const uploadedLogo = bizId ? await uploadBusinessLogo(bizId, input.logo) : input.logo;
 
-          // Upload logo to Supabase Storage if it's a data URL
-          const uploadedLogo = await uploadBusinessLogo(bizId, input.logo);
-
-          const payload = {
-            id: bizId,
+          const payload: any = {
             owner_id: user.id,
             name: input.name,
             name_ml: input.nameMl ?? null,
@@ -329,37 +363,45 @@ export const myBusinessService = {
             social: input.social ?? {},
             template: input.template,
             orientation: input.orientation,
-            // SECURITY: always 'pending' on new insert; retain existing status on update
             status: existing ? existing.status : "pending",
           };
+          if (bizId) payload.id = bizId;
 
-          const { error: upsertErr } = await supabase
+          const { data: savedRow, error: upsertErr } = await supabase
             .from("businesses")
-            .upsert(payload, { onConflict: "id" });
+            .upsert(payload)
+            .select("id")
+            .single();
 
-          if (!upsertErr) {
-            // Update business categories
-            await supabase.from("business_categories").delete().eq("business_id", bizId);
+          if (!upsertErr && savedRow?.id) {
+            const actualBizId = savedRow.id;
+            await supabase.from("business_categories").delete().eq("business_id", actualBizId);
             if (input.categoryIds?.length) {
               const catRows = input.categoryIds.map((cid) => ({
-                business_id: bizId,
+                business_id: actualBizId,
                 category_id: cid,
               }));
               await supabase.from("business_categories").insert(catRows);
             }
 
-            const fresh = await businessService.getById(bizId);
+            const fresh = await businessService.getById(actualBizId);
             if (fresh) return fresh;
           } else {
-            console.warn("Supabase upsert business error:", upsertErr.message);
+            console.warn("Supabase upsert business error:", upsertErr?.message);
+            if (isProd) throw upsertErr;
           }
         }
       } catch (e) {
+        if (isProd) throw e;
         console.warn("Supabase myBusinessService.save error, using fallback:", e);
       }
     }
 
-    // Local fallback
+    if (isProd) {
+      throw new Error("Cannot save business: user is not authenticated or Supabase failed in production.");
+    }
+
+    // Local fallback for dev
     const tags = db.categories.filter((c) => input.categoryIds.includes(c.id)).map((c) => c.name);
     const b: Business = { ...input, id: MY_BUSINESS_ID, tags, lastUpdated: "Just now", hasNewStatus: false };
     localStorage.setItem(MY_BUSINESS_KEY, JSON.stringify(b));
@@ -405,11 +447,15 @@ export const professionalService = {
             categoryIds: (p.professional_categories || []).map((pc: any) => pc.category_id),
             experienceYears: p.experience_years ?? 0,
           }));
+        } else if (error && isProd) {
+          throw error;
         }
       } catch (e) {
+        if (isProd) throw e;
         console.warn("Supabase professionalService.list error, using fallback:", e);
       }
     }
+    if (isProd) return [];
     return delay(db.serviceProfessionals);
   },
 };
@@ -428,7 +474,7 @@ export const updateService = {
           .gt("expires_at", new Date().toISOString())
           .order("posted_at", { ascending: false });
 
-        if (companyId) {
+        if (companyId && isValidUuid(companyId)) {
           q = q.eq("business_id", companyId);
         }
 
@@ -450,12 +496,16 @@ export const updateService = {
             postedAt: u.posted_at,
             expiresAt: u.expires_at,
           }));
+        } else if (error && isProd) {
+          throw error;
         }
       } catch (e) {
+        if (isProd) throw e;
         console.warn("Supabase updateService.list error, using fallback:", e);
       }
     }
 
+    if (isProd) return [];
     const now = Date.now();
     const all = [...ownUpdateService.list(), ...db.updates]
       .filter((u) => new Date(u.expiresAt).getTime() > now && (!companyId || u.companyId === companyId))
@@ -468,7 +518,7 @@ export const templateService = {
   list: (): Promise<CardTemplate[]> => delay(db.cardTemplates),
 };
 
-/* ---------- Saved-card wallet (localStorage until the backend exists) ---------- */
+/* ---------- Saved-card wallet (localStorage + Supabase sync) ---------- */
 const WALLET_KEY = "bizapp.wallet";
 export interface WalletState { savedIds: string[]; mutedIds: string[] }
 const listeners = new Set<() => void>();
@@ -492,20 +542,78 @@ const toggle = (list: string[], id: string) => (list.includes(id) ? list.filter(
 export const walletService = {
   get: read,
   subscribe: (l: () => void) => { listeners.add(l); return () => { listeners.delete(l); }; },
+
   /** Saving a card follows the business; unsaving also clears its mute. */
   toggleSave: (id: string) => {
     const s = read();
     const saved = s.savedIds.includes(id);
-    write({ savedIds: toggle(s.savedIds, id), mutedIds: saved ? s.mutedIds.filter((x) => x !== id) : s.mutedIds });
+    const nextSavedIds = toggle(s.savedIds, id);
+    const nextMutedIds = saved ? s.mutedIds.filter((x) => x !== id) : s.mutedIds;
+    write({ savedIds: nextSavedIds, mutedIds: nextMutedIds });
+
+    if (isSupabaseConfigured() && isValidUuid(id)) {
+      supabase.auth.getUser().then(({ data: authData }) => {
+        const user = authData?.user;
+        if (user) {
+          if (saved) {
+            supabase.from("saved_cards").delete().match({ user_id: user.id, business_id: id }).catch(() => {});
+          } else {
+            supabase.from("saved_cards").insert({ user_id: user.id, business_id: id }).catch(() => {});
+          }
+        }
+      });
+    }
   },
-  toggleMute: (id: string) => { const s = read(); write({ ...s, mutedIds: toggle(s.mutedIds, id) }); },
+
+  toggleMute: (id: string) => {
+    const s = read();
+    const nextMutedIds = toggle(s.mutedIds, id);
+    const willBeMuted = nextMutedIds.includes(id);
+    write({ ...s, mutedIds: nextMutedIds });
+
+    if (isSupabaseConfigured() && isValidUuid(id)) {
+      supabase.auth.getUser().then(({ data: authData }) => {
+        const user = authData?.user;
+        if (user) {
+          supabase.from("saved_cards").update({ muted: willBeMuted }).match({ user_id: user.id, business_id: id }).catch(() => {});
+        }
+      });
+    }
+  },
+
+  /** Sync saved and muted cards from Supabase for current authenticated user. */
+  sync: async () => {
+    if (!isSupabaseConfigured()) return;
+    try {
+      const { data: authData } = await supabase.auth.getUser();
+      const user = authData?.user;
+      if (!user) return;
+      const { data, error } = await supabase
+        .from("saved_cards")
+        .select("business_id, muted")
+        .eq("user_id", user.id);
+      if (!error && data) {
+        const savedIds = data.map((r: any) => r.business_id);
+        const mutedIds = data.filter((r: any) => r.muted).map((r: any) => r.business_id);
+        write({ savedIds, mutedIds });
+      }
+    } catch (e) {
+      console.warn("Supabase walletService.sync error:", e);
+    }
+  },
+
   /** Offers from saved, unmuted businesses. */
   followedUpdates: (all: BusinessUpdate[], s: WalletState = read()) =>
     all.filter((u) => s.savedIds.includes(u.companyId) && !s.mutedIds.includes(u.companyId)),
-  _reset: () => { cache = null; },
+
+  _reset: () => {
+    cache = { savedIds: [], mutedIds: [] };
+    try { localStorage.removeItem(WALLET_KEY); } catch { /* ignore */ }
+    listeners.forEach((l) => l());
+  },
 };
 
-/* ---------- Recent searches (localStorage) ---------- */
+/* ---------- Recent searches (localStorage — stays local) ---------- */
 const RECENT_KEY = "bizapp.recentSearches";
 export const recentSearchService = {
   get: (): string[] => {

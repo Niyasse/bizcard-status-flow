@@ -1,4 +1,4 @@
-import { useState, useSyncExternalStore } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle, XCircle, EyeOff, Eye, Flag } from "lucide-react";
@@ -24,7 +24,15 @@ const AdminPage = () => {
   useSyncExternalStore(moderationStore.subscribe, moderationStore.get);
   const reports = useSyncExternalStore(reportsStore.subscribe, reportsStore.get).items;
   const statusOf = (id: string) => moderationService.statusOf(id, id === MY_BUSINESS_ID);
-  const setStatus = (id: string, s: ListingStatus) => { moderationService.setStatus(id, s); qc.invalidateQueries({ queryKey: ["businesses"] }); };
+  useEffect(() => {
+    reportService.sync();
+  }, []);
+
+  const setStatus = (id: string, s: ListingStatus) => {
+    moderationService.setStatus(id, s);
+    qc.invalidateQueries({ queryKey: ["businesses"] });
+    qc.invalidateQueries({ queryKey: ["admin-businesses"] });
+  };
   const nameOf = (id: string) => all.find((b) => b.id === id)?.name ?? id;
 
   const pending = all.filter((b) => statusOf(b.id) === "pending");

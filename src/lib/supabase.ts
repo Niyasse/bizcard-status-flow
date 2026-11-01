@@ -21,6 +21,13 @@ export const isSupabaseConfigured = (): boolean => {
   );
 };
 
+export const isProd = import.meta.env.PROD;
+export const isDev = !isProd;
+
+export function isValidUuid(id: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+}
+
 // Singleton client instance or dummy client
 export const supabase: SupabaseClient = createClient(
   supabaseUrl || "https://placeholder-project.supabase.co",

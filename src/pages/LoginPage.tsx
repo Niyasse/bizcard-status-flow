@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { homeFor, isValidPhone, validateSignup } from "@/lib/auth";
 import { userService } from "@/services/admin";
+import { isProd } from "@/lib/supabase";
 import { Shield, Store, User as UserIcon } from "lucide-react";
 
 type Step = "form" | "otp";
@@ -63,13 +64,13 @@ const LoginPage = () => {
       ? { ...validateSignup({ name, phone, email, role }) } as Record<string, string>
       : isValidPhone(phone) ? {} : { phone: "Enter a 10-digit mobile number" };
 
-    if (mode === "login" && !errs.phone && !userService.findByPhone(cleanPhone)) {
+    if (mode === "login" && !isProd && !errs.phone && !userService.findByPhone(cleanPhone)) {
       errs.phone = "No dummy account with this number. Try 9000000002 (Customer), 9000000003 (Owner), or 9000000001 (Admin).";
     }
 
     setErrors(errs);
     if (Object.keys(errs).length === 0) {
-      setOtp("123456");
+      if (!isProd) setOtp("123456");
       setStep("otp");
     }
   };
@@ -84,7 +85,7 @@ const LoginPage = () => {
 
     if (!u) {
       setErrors({
-        otp: "Invalid code. For development dummy login, use 123456.",
+        otp: isProd ? "Invalid verification code. Please check and try again." : "Invalid code. For development dummy login, use 123456.",
       });
       return;
     }
@@ -121,7 +122,9 @@ const LoginPage = () => {
             <span className="text-primary-foreground font-bold text-2xl">B</span>
           </div>
           <h1 className="text-xl font-bold">{mode === "login" ? "Welcome back" : "Create your account"}</h1>
-          <p className="text-sm text-muted-foreground">Sign in with your mobile number (OTP: 123456)</p>
+          <p className="text-sm text-muted-foreground">
+            {isProd ? "Sign in with your mobile number" : "Sign in with your mobile number (OTP: 123456)"}
+          </p>
         </div>
 
         <Tabs value={mode} onValueChange={(v) => { setMode(v as typeof mode); setStep("form"); setErrors({}); }}>
@@ -160,9 +163,11 @@ const LoginPage = () => {
                     Code sent to <span className="font-medium text-foreground">{phone}</span>.{" "}
                     <button type="button" onClick={() => setStep("form")} className="text-primary underline">Change</button>
                   </p>
-                  <div className="bg-muted/50 p-2.5 rounded-lg text-xs text-muted-foreground text-center">
-                    💡 Development Mode OTP: <span className="font-mono font-bold text-foreground">123456</span>
-                  </div>
+                  {!isProd && (
+                    <div className="bg-muted/50 p-2.5 rounded-lg text-xs text-muted-foreground text-center">
+                      💡 Development Mode OTP: <span className="font-mono font-bold text-foreground">123456</span>
+                    </div>
+                  )}
                   {field("otp", "6-digit code",
                     <Input id="otp" className="h-11 text-center tracking-widest text-lg font-mono" inputMode="numeric" maxLength={6}
                       value={otp} onChange={(e) => setOtp(e.target.value)} autoFocus aria-invalid={!!errors.otp} />)}
@@ -174,62 +179,64 @@ const LoginPage = () => {
         </Tabs>
 
         {/* Development Dummy Accounts Card */}
-        <div className="mt-6 pt-5 border-t space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-foreground uppercase tracking-wider">
-              1-Click Dummy Accounts
-            </span>
-            <span className="text-[10px] bg-secondary text-secondary-foreground px-2 py-0.5 rounded font-mono">
-              OTP: 123456
-            </span>
-          </div>
+        {!isProd && (
+          <div className="mt-6 pt-5 border-t space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-foreground uppercase tracking-wider">
+                1-Click Dummy Accounts
+              </span>
+              <span className="text-[10px] bg-secondary text-secondary-foreground px-2 py-0.5 rounded font-mono">
+                OTP: 123456
+              </span>
+            </div>
 
-          <div className="grid gap-2">
-            {DEMO_ACCOUNTS.map((acc) => {
-              const Icon = acc.icon;
-              return (
-                <div
-                  key={acc.role}
-                  className="flex items-center justify-between p-2.5 rounded-lg border border-border bg-card/60 hover:bg-muted/50 transition-colors cursor-pointer text-left"
-                  onClick={() => quickLogin(acc)}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                      <Icon className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium leading-none mb-1 flex items-center gap-2">
-                        {acc.label}
-                        <span className="text-[10px] text-muted-foreground font-normal">
-                          ({acc.badge})
-                        </span>
-                      </div>
-                      <div className="text-xs text-muted-foreground font-mono">
-                        📱 {acc.phone} &bull; ✉️ {acc.email}
-                      </div>
-                    </div>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-8 text-xs shrink-0"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      quickLogin(acc);
-                    }}
+            <div className="grid gap-2">
+              {DEMO_ACCOUNTS.map((acc) => {
+                const Icon = acc.icon;
+                return (
+                  <div
+                    key={acc.role}
+                    className="flex items-center justify-between p-2.5 rounded-lg border border-border bg-card/60 hover:bg-muted/50 transition-colors cursor-pointer text-left"
+                    onClick={() => quickLogin(acc)}
                   >
-                    Login
-                  </Button>
-                </div>
-              );
-            })}
-          </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium leading-none mb-1 flex items-center gap-2">
+                          {acc.label}
+                          <span className="text-[10px] text-muted-foreground font-normal">
+                            ({acc.badge})
+                          </span>
+                        </div>
+                        <div className="text-xs text-muted-foreground font-mono">
+                          📱 {acc.phone} &bull; ✉️ {acc.email}
+                        </div>
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-8 text-xs shrink-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        quickLogin(acc);
+                      }}
+                    >
+                      Login
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
 
-          <p className="text-[11px] text-center text-muted-foreground">
-            Click any row to sign in instantly, or use their phone with OTP <code className="font-mono text-foreground">123456</code>.
-          </p>
-        </div>
+            <p className="text-[11px] text-center text-muted-foreground">
+              Click any row to sign in instantly, or use their phone with OTP <code className="font-mono text-foreground">123456</code>.
+            </p>
+          </div>
+        )}
 
         <div className="mt-4 text-center">
           <Link to="/" className="text-xs text-muted-foreground hover:underline">← Back to discovery</Link>

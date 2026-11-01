@@ -21,19 +21,19 @@ The frontend is complete against mock data. Every screen reads data through `src
 | ServiceProfessional | `professionals` | as model | |
 | CardTemplate | static in code | | no table needed |
 
-## 2. Service methods → mock-data replacement points
+## 2. Service methods → mock-data replacement points (Status: Completed in Sprint 6D)
 
 | Service (file) | Methods | Replace with |
 |---|---|---|
 | `locationService`, `categoryService` (services/index.ts) | getDistricts, getLocalities, getCategories | `select` from seed tables |
 | `businessService` | list(filter) (approved only), listAll() (admin), getById | `select … where status='approved'` + filters; full-text search on name/name_ml/tagline/category |
 | `myBusinessService` | get, save, remove | `businesses` row where owner_id = auth.uid() (save inserts with status `pending`) |
-| `updateService`, `ownUpdateService` (engagement.ts) | list, save, remove | `business_updates` (active = expires_at > now()) |
-| `walletService` | get, toggleSave, toggleMute, followedUpdates | `saved_cards` |
-| `prefsService` | markRead, toggleAlerts | `update_reads`, `saved_cards.alerts_off` |
-| `trackingService` | logView, logQrVisit, logEnquiry | insert into `events` (anon allowed, rate-limited) |
+| `updateService`, `ownUpdateService` (engagement.ts) | list, save, remove | `business_updates` (active = expires_at > now()) — Connected to Supabase with sync |
+| `walletService` | get, toggleSave, toggleMute, followedUpdates | `saved_cards` — Connected to Supabase with cross-device sync |
+| `prefsService` | markRead, toggleAlerts | `update_reads`, `saved_cards.alerts_off` — Connected to Supabase |
+| `trackingService` | view, qrVisit, enquiry | `events` (view, qr_visit, whatsapp_enquiry) — Connected to Supabase + real dashboard sync |
 | `moderationService` (admin.ts) | statusOf, setStatus | `businesses.status` update — admin only |
-| `reportService` | list, add, setStatus | `reports` |
+| `reportService` | list, add, setStatus | `reports` — Connected to Supabase with reporter RLS & admin review |
 | `userService` | list, findByPhone, findByEmail, upsert | `profiles` + `user_roles` (admin list only) |
 | `AuthContext` (contexts/AuthContext.tsx) | login, loginWithOtp, signup, updateProfile, logout | Supabase phone OTP (`signInWithOtp`/`verifyOtp`), `onAuthStateChange`; demo accounts and `MOCK_OTP` removed |
 | `settingsStore` | language | can stay local, or `profiles.language` |
