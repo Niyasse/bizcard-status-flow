@@ -207,12 +207,23 @@ interface TrackState { views: Record<string, number>; qrVisits: Record<string, n
 export const trackStore = store<TrackState>("bizapp.tracking", { views: {}, qrVisits: {}, enquiries: [] });
 const bump = (m: Record<string, number>, id: string) => ({ ...m, [id]: (m[id] ?? 0) + 1 });
 
+// Deduplication map to prevent rapid spam/duplicate analytics events
+const eventCooldowns = new Map<string, number>();
+function shouldLogEvent(type: string, id: string, cooldownMs = 30_000): boolean {
+  const key = `${type}:${id}`;
+  const now = Date.now();
+  const last = eventCooldowns.get(key) ?? 0;
+  if (now - last < cooldownMs) return false;
+  eventCooldowns.set(key, now);
+  return true;
+}
+
 export const trackingService = {
   view: (id: string) => {
     const s = trackStore.get();
     trackStore.set({ ...s, views: bump(s.views, id) });
 
-    if (isSupabaseConfigured() && isValidUuid(id)) {
+    if (isSupabaseConfigured() && isValidUuid(id) && shouldLogEvent("view", id)) {
       supabase.from("events").insert({ business_id: id, event_type: "view" }).catch(() => {});
     }
   },
@@ -221,7 +232,7 @@ export const trackingService = {
     const s = trackStore.get();
     trackStore.set({ ...s, qrVisits: bump(s.qrVisits, id) });
 
-    if (isSupabaseConfigured() && isValidUuid(id)) {
+    if (isSupabaseConfigured() && isValidUuid(id) && shouldLogEvent("qr_visit", id)) {
       supabase.from("events").insert({ business_id: id, event_type: "qr_visit" }).catch(() => {});
     }
   },
@@ -231,7 +242,7 @@ export const trackingService = {
     const s = trackStore.get();
     trackStore.set({ ...s, enquiries: [{ ref, businessId, at: new Date().toISOString() }, ...s.enquiries].slice(0, 200) });
 
-    if (isSupabaseConfigured() && isValidUuid(businessId)) {
+    if (isSupabaseConfigured() && isValidUuid(businessId) && shouldLogEvent("whatsapp_enquiry", businessId, 10_000)) {
       supabase.from("events").insert({
         business_id: businessId,
         event_type: "whatsapp_enquiry",

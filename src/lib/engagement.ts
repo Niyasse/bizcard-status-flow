@@ -1,6 +1,7 @@
 // Pure Sprint 4 rules: owner updates, unread/notifications, enquiries. Unit-tested.
 import type { BusinessUpdate } from "@/types";
 import { isValidUrl } from "./validation";
+import { getPublicBaseUrl } from "./urls";
 
 export const MAX_ACTIVE_UPDATES = 3;
 export const MAX_UPDATE_CHARS = 200;
@@ -64,4 +65,4 @@ export function whatsAppEnquiryUrl(waId: string, businessName: string, ref: stri
 }
 
 /** Permanent QR link: profile address tagged as a QR source. */
-export const qrLink = (origin: string, businessId: string) => `${origin}/profile/${businessId}?src=qr`;
+export const qrLink = (origin: string, businessId: string) => `${(origin || getPublicBaseUrl()).replace(/\/+$/, "")}/profile/${businessId}?src=qr`;

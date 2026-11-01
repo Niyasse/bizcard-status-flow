@@ -8,7 +8,8 @@ import { trackingService } from "@/services";
 import { whatsAppEnquiryUrl, qrLink } from "@/lib/engagement";
 import { toWhatsAppId } from "@/lib/validation";
 
-export const profileUrl = (id: string) => `${window.location.origin}/profile/${id}`;
+import { profileUrl, qrUrl } from "@/lib/urls";
+export { profileUrl, qrUrl };
 
 export interface BusinessCardProps {
   id: string;

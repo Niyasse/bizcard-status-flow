@@ -486,3 +486,42 @@ describe("Sprint 6D — Live Data Integration, RLS Isolation & Analytics (PGlite
     await db.exec(`RESET ROLE;`);
   });
 });
+
+describe("Sprint 6E — Pre-Launch Integration, URL Canonicalization & Vercel Readiness", () => {
+  it("generates permanent canonical profile and QR URLs", async () => {
+    const { getPublicBaseUrl, profileUrl, qrUrl } = await import("./urls");
+    const bizId = "b1a2c3d4-0001-0001-0001-000000000001";
+
+    const base = getPublicBaseUrl();
+    expect(base).toBeTruthy();
+
+    const pUrl = profileUrl(bizId);
+    expect(pUrl).toBe(`${base}/profile/${bizId}`);
+
+    const qUrl = qrUrl(bizId);
+    expect(qUrl).toBe(`${base}/profile/${bizId}?src=qr`);
+  });
+
+  it("ensures WhatsApp enquiry reference IDs match database regex constraint", async () => {
+    const { makeReferenceId } = await import("./engagement");
+    const bizId = "b1a2c3d4-0001-0001-0001-000000000001";
+
+    for (let i = 0; i < 20; i++) {
+      const ref = makeReferenceId(bizId);
+      // Constraint in 001_initial_schema.sql: ref_id ~ '^BZ-[A-Z0-9]+-[A-Z0-9]+$'
+      expect(ref).toMatch(/^BZ-[A-Z0-9]+-[A-Z0-9]+$/);
+    }
+  });
+
+  it("verifies vercel.json contains SPA fallback rewrites for direct routing", () => {
+    const vercelConfig = JSON.parse(fs.readFileSync("vercel.json", "utf8"));
+    expect(vercelConfig.framework).toBe("vite");
+    expect(vercelConfig.buildCommand).toBe("npm run build");
+    expect(vercelConfig.outputDirectory).toBe("dist");
+
+    const hasSpaRewrite = vercelConfig.rewrites.some(
+      (r: any) => r.source === "/(.*)" && r.destination === "/index.html"
+    );
+    expect(hasSpaRewrite).toBe(true);
+  });
+});
