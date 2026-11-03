@@ -1,7 +1,7 @@
 // Sprint 5 & 6D services: listing moderation, user reports, mock user accounts, app settings.
 import type { AppUser, ListingStatus, Report } from "@/types";
 import { defaultListingStatus } from "@/lib/auth";
-import { isSupabaseConfigured, supabase, isValidUuid, isProd } from "@/lib/supabase";
+import { isSupabaseConfigured, supabase, isValidUuid, isProd, toDbUuid } from "@/lib/supabase";
 import { store } from "./engagement";
 
 /* ---------- Listing moderation ---------- */
@@ -15,11 +15,12 @@ export const moderationService = {
     const s = moderationStore.get();
     moderationStore.set({ statuses: { ...s.statuses, [id]: status } });
 
-    if (isSupabaseConfigured() && isValidUuid(id)) {
+    const targetUuid = toDbUuid(id);
+    if (isSupabaseConfigured() && isValidUuid(targetUuid)) {
       supabase
         .from("businesses")
         .update({ status })
-        .eq("id", id)
+        .eq("id", targetUuid)
         .then(({ error }) => {
           if (error) console.warn("Supabase moderation setStatus error:", error.message);
         })
@@ -55,14 +56,15 @@ export const reportService = {
     };
     reportsStore.set({ items: [r, ...reportsStore.get().items] });
 
-    if (isSupabaseConfigured() && isValidUuid(businessId)) {
+    const targetUuid = toDbUuid(businessId);
+    if (isSupabaseConfigured() && isValidUuid(targetUuid)) {
       supabase.auth.getUser().then(({ data: authData }) => {
         const user = authData?.user;
         supabase
           .from("reports")
           .insert({
             id: isValidUuid(reportId) ? reportId : undefined,
-            business_id: businessId,
+            business_id: targetUuid,
             reporter_id: user?.id ?? null,
             reason,
             status: "open",

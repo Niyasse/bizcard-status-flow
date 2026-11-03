@@ -8,6 +8,7 @@ import { useBusinesses, useCategories, useDistricts, useLocalities, usePrefs, us
 import { prefsService, walletService } from "@/services";
 import { unreadUpdates } from "@/lib/engagement";
 import { cn } from "@/lib/utils";
+import { toDbUuid } from "@/lib/supabase";
 
 type Feed = "following" | "near" | "all";
 const selectCls = "h-9 rounded-md border bg-card px-2 text-sm min-w-0";
@@ -35,10 +36,14 @@ const StatusPage = () => {
   const shown = useMemo(() => {
     if (feed === "following") return walletService.followedUpdates(allUpdates, wallet);
     if (feed === "all") return allUpdates;
-    const byId = new Map(businesses.map((b) => [b.id, b]));
+    const byId = new Map<string, (typeof businesses)[0]>();
+    businesses.forEach((b) => {
+      byId.set(b.id, b);
+      byId.set(toDbUuid(b.id), b);
+    });
     const now = Date.now();
     return allUpdates.filter((u) => {
-      const b = byId.get(u.companyId);
+      const b = byId.get(u.companyId) || byId.get(toDbUuid(u.companyId));
       if (!b) return false;
       if (districtId && b.districtId !== districtId) return false;
       if (localityId && b.localityId !== localityId) return false;

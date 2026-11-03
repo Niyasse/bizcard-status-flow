@@ -6,7 +6,7 @@ export * from "./engagement";
 export * from "./admin";
 import { moderationService, moderationStore } from "./admin";
 import { isPublicListing } from "@/lib/auth";
-import { isSupabaseConfigured, supabase, uploadBusinessLogo, isValidUuid, isProd } from "@/lib/supabase";
+import { isSupabaseConfigured, supabase, uploadBusinessLogo, isValidUuid, isProd, MOCK_ID_TO_UUID, UUID_TO_MOCK_ID, toDbUuid } from "@/lib/supabase";
 import type {
   Business, BusinessFilter, BusinessUpdate, CardTemplate, Category, District, Locality, ServiceProfessional, ListingStatus,
 } from "@/types";
@@ -268,7 +268,8 @@ export const businessService = {
   },
 
   getById: async (id: string): Promise<Business | null> => {
-    if (isSupabaseConfigured() && isValidUuid(id)) {
+    const targetUuid = toDbUuid(id);
+    if (isSupabaseConfigured() && isValidUuid(targetUuid)) {
       try {
         const { data, error } = await supabase
           .from("businesses")
@@ -279,7 +280,7 @@ export const businessService = {
               categories(id, name, name_ml)
             )
           `)
-          .eq("id", id)
+          .eq("id", targetUuid)
           .maybeSingle();
 
         if (!error && data) {
@@ -293,7 +294,15 @@ export const businessService = {
       }
     }
     if (isProd) return null;
-    return delay(allBusinesses().find((b) => b.id === id) ?? null);
+    return delay(
+      allBusinesses().find(
+        (b) =>
+          b.id === id ||
+          b.id === targetUuid ||
+          toDbUuid(b.id) === id ||
+          toDbUuid(b.id) === targetUuid
+      ) ?? null
+    );
   },
 };
 
@@ -463,6 +472,7 @@ export const professionalService = {
 export const updateService = {
   /** Active offers (mock + owner's own), newest first. */
   list: async (companyId?: string): Promise<BusinessUpdate[]> => {
+    const targetUuid = companyId ? toDbUuid(companyId) : undefined;
     if (isSupabaseConfigured()) {
       try {
         let q = supabase
@@ -474,8 +484,8 @@ export const updateService = {
           .gt("expires_at", new Date().toISOString())
           .order("posted_at", { ascending: false });
 
-        if (companyId && isValidUuid(companyId)) {
-          q = q.eq("business_id", companyId);
+        if (targetUuid && isValidUuid(targetUuid)) {
+          q = q.eq("business_id", targetUuid);
         }
 
         const { data, error } = await withTimeout(q);
@@ -484,7 +494,9 @@ export const updateService = {
             id: u.id,
             companyId: u.business_id,
             companyName: u.businesses?.name || "Business",
-            companyLogo: u.businesses?.logo || "",
+            companyLogo:
+              u.businesses?.logo ||
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(u.businesses?.name || "B")}&background=128C7E&color=fff`,
             content: u.content,
             link: u.link_url
               ? {
@@ -508,7 +520,15 @@ export const updateService = {
     if (isProd) return [];
     const now = Date.now();
     const all = [...ownUpdateService.list(), ...db.updates]
-      .filter((u) => new Date(u.expiresAt).getTime() > now && (!companyId || u.companyId === companyId))
+      .filter(
+        (u) =>
+          new Date(u.expiresAt).getTime() > now &&
+          (!companyId ||
+            u.companyId === companyId ||
+            u.companyId === targetUuid ||
+            toDbUuid(u.companyId) === companyId ||
+            toDbUuid(u.companyId) === targetUuid)
+      )
       .sort((a, b) => b.postedAt.localeCompare(a.postedAt));
     return delay(all);
   },
@@ -546,19 +566,20 @@ export const walletService = {
   /** Saving a card follows the business; unsaving also clears its mute. */
   toggleSave: (id: string) => {
     const s = read();
-    const saved = s.savedIds.includes(id);
+    const saved = s.savedIds.includes(id) || (toDbUuid(id) !== id && s.savedIds.includes(toDbUuid(id)));
     const nextSavedIds = toggle(s.savedIds, id);
-    const nextMutedIds = saved ? s.mutedIds.filter((x) => x !== id) : s.mutedIds;
+    const nextMutedIds = saved ? s.mutedIds.filter((x) => x !== id && x !== toDbUuid(id)) : s.mutedIds;
     write({ savedIds: nextSavedIds, mutedIds: nextMutedIds });
 
-    if (isSupabaseConfigured() && isValidUuid(id)) {
+    const targetUuid = toDbUuid(id);
+    if (isSupabaseConfigured() && isValidUuid(targetUuid)) {
       supabase.auth.getUser().then(({ data: authData }) => {
         const user = authData?.user;
         if (user) {
           if (saved) {
-            supabase.from("saved_cards").delete().match({ user_id: user.id, business_id: id }).catch(() => {});
+            supabase.from("saved_cards").delete().match({ user_id: user.id, business_id: targetUuid }).catch(() => {});
           } else {
-            supabase.from("saved_cards").insert({ user_id: user.id, business_id: id }).catch(() => {});
+            supabase.from("saved_cards").insert({ user_id: user.id, business_id: targetUuid }).catch(() => {});
           }
         }
       });
@@ -571,11 +592,12 @@ export const walletService = {
     const willBeMuted = nextMutedIds.includes(id);
     write({ ...s, mutedIds: nextMutedIds });
 
-    if (isSupabaseConfigured() && isValidUuid(id)) {
+    const targetUuid = toDbUuid(id);
+    if (isSupabaseConfigured() && isValidUuid(targetUuid)) {
       supabase.auth.getUser().then(({ data: authData }) => {
         const user = authData?.user;
         if (user) {
-          supabase.from("saved_cards").update({ muted: willBeMuted }).match({ user_id: user.id, business_id: id }).catch(() => {});
+          supabase.from("saved_cards").update({ muted: willBeMuted }).match({ user_id: user.id, business_id: targetUuid }).catch(() => {});
         }
       });
     }
@@ -604,7 +626,11 @@ export const walletService = {
 
   /** Offers from saved, unmuted businesses. */
   followedUpdates: (all: BusinessUpdate[], s: WalletState = read()) =>
-    all.filter((u) => s.savedIds.includes(u.companyId) && !s.mutedIds.includes(u.companyId)),
+    all.filter((u) => {
+      const isSaved = s.savedIds.some((id) => id === u.companyId || toDbUuid(id) === u.companyId || id === toDbUuid(u.companyId));
+      const isMuted = s.mutedIds.some((id) => id === u.companyId || toDbUuid(id) === u.companyId || id === toDbUuid(u.companyId));
+      return isSaved && !isMuted;
+    }),
 
   _reset: () => {
     cache = { savedIds: [], mutedIds: [] };

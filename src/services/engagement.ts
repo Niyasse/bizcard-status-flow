@@ -1,7 +1,7 @@
 // Sprint 4 & 6D services: owner updates, read/alerts state, tracking, connected to Supabase.
 import type { BusinessUpdate } from "@/types";
 import { detectPlatform, makeReferenceId, type UpdateForm } from "@/lib/engagement";
-import { isSupabaseConfigured, supabase, isValidUuid, isProd } from "@/lib/supabase";
+import { isSupabaseConfigured, supabase, isValidUuid, isProd, toDbUuid } from "@/lib/supabase";
 
 export function store<T>(key: string, fallback: T) {
   const listeners = new Set<() => void>();
@@ -53,10 +53,11 @@ export const ownUpdateService = {
     ownUpdatesStore.set({ items: [item, ...items] });
 
     // Sync to Supabase if valid UUID
-    if (isSupabaseConfigured() && isValidUuid(biz.id)) {
+    const targetBizUuid = toDbUuid(biz.id);
+    if (isSupabaseConfigured() && isValidUuid(targetBizUuid)) {
       const row = {
         id: isValidUuid(updateId) ? updateId : undefined,
-        business_id: biz.id,
+        business_id: targetBizUuid,
         content: item.content,
         link_url: url || null,
         link_title: item.link?.title || null,
@@ -98,7 +99,8 @@ export const ownUpdateService = {
 
   /** Sync updates for an owner's business from Supabase. */
   sync: async (businessId: string) => {
-    if (!isSupabaseConfigured() || !isValidUuid(businessId)) return;
+    const targetUuid = toDbUuid(businessId);
+    if (!isSupabaseConfigured() || !isValidUuid(targetUuid)) return;
     try {
       const { data, error } = await supabase
         .from("business_updates")
@@ -106,7 +108,7 @@ export const ownUpdateService = {
           *,
           businesses(id, name, logo)
         `)
-        .eq("business_id", businessId)
+        .eq("business_id", targetUuid)
         .order("posted_at", { ascending: false });
 
       if (!error && data) {
@@ -160,14 +162,15 @@ export const prefsService = {
     const off = s.alertsOffIds.includes(businessId);
     prefsStore.set({ ...s, alertsOffIds: off ? s.alertsOffIds.filter((x) => x !== businessId) : [...s.alertsOffIds, businessId] });
 
-    if (isSupabaseConfigured() && isValidUuid(businessId)) {
+    const targetUuid = toDbUuid(businessId);
+    if (isSupabaseConfigured() && isValidUuid(targetUuid)) {
       supabase.auth.getUser().then(({ data: authData }) => {
         const user = authData?.user;
         if (user) {
           supabase
             .from("saved_cards")
             .update({ alerts_off: !off })
-            .match({ user_id: user.id, business_id: businessId })
+            .match({ user_id: user.id, business_id: targetUuid })
             .catch(() => {});
         }
       });
@@ -223,8 +226,9 @@ export const trackingService = {
     const s = trackStore.get();
     trackStore.set({ ...s, views: bump(s.views, id) });
 
-    if (isSupabaseConfigured() && isValidUuid(id) && shouldLogEvent("view", id)) {
-      supabase.from("events").insert({ business_id: id, event_type: "view" }).catch(() => {});
+    const targetUuid = toDbUuid(id);
+    if (isSupabaseConfigured() && isValidUuid(targetUuid) && shouldLogEvent("view", targetUuid)) {
+      supabase.from("events").insert({ business_id: targetUuid, event_type: "view" }).catch(() => {});
     }
   },
 
@@ -232,8 +236,9 @@ export const trackingService = {
     const s = trackStore.get();
     trackStore.set({ ...s, qrVisits: bump(s.qrVisits, id) });
 
-    if (isSupabaseConfigured() && isValidUuid(id) && shouldLogEvent("qr_visit", id)) {
-      supabase.from("events").insert({ business_id: id, event_type: "qr_visit" }).catch(() => {});
+    const targetUuid = toDbUuid(id);
+    if (isSupabaseConfigured() && isValidUuid(targetUuid) && shouldLogEvent("qr_visit", targetUuid)) {
+      supabase.from("events").insert({ business_id: targetUuid, event_type: "qr_visit" }).catch(() => {});
     }
   },
 
@@ -242,9 +247,10 @@ export const trackingService = {
     const s = trackStore.get();
     trackStore.set({ ...s, enquiries: [{ ref, businessId, at: new Date().toISOString() }, ...s.enquiries].slice(0, 200) });
 
-    if (isSupabaseConfigured() && isValidUuid(businessId) && shouldLogEvent("whatsapp_enquiry", businessId, 10_000)) {
+    const targetUuid = toDbUuid(businessId);
+    if (isSupabaseConfigured() && isValidUuid(targetUuid) && shouldLogEvent("whatsapp_enquiry", targetUuid, 10_000)) {
       supabase.from("events").insert({
-        business_id: businessId,
+        business_id: targetUuid,
         event_type: "whatsapp_enquiry",
         ref_id: ref,
       }).catch(() => {});
@@ -254,12 +260,13 @@ export const trackingService = {
 
   /** Sync real dashboard counts from Supabase events for the owner. */
   syncCounts: async (businessId: string) => {
-    if (!isSupabaseConfigured() || !isValidUuid(businessId)) return;
+    const targetUuid = toDbUuid(businessId);
+    if (!isSupabaseConfigured() || !isValidUuid(targetUuid)) return;
     try {
       const { data: events, error } = await supabase
         .from("events")
         .select("event_type, ref_id, created_at")
-        .eq("business_id", businessId);
+        .eq("business_id", targetUuid);
 
       if (!error && events) {
         const viewsCount = events.filter((e) => e.event_type === "view").length;

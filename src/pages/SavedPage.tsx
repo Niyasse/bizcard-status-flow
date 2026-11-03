@@ -3,11 +3,14 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { ProfileList } from "@/components/ProfileList";
 import { SaveButton } from "@/components/SaveButton";
 import { useBusinesses, useWallet } from "@/hooks/use-data";
+import { toDbUuid } from "@/lib/supabase";
 
 const SavedPage = () => {
   const { savedIds } = useWallet();
   const { data: all = [] } = useBusinesses();
-  const saved = all.filter((b) => savedIds.includes(b.id));
+  const saved = all.filter((b) =>
+    savedIds.some((sId) => sId === b.id || toDbUuid(sId) === b.id || sId === toDbUuid(b.id))
+  );
 
   return (
     <AppShell>

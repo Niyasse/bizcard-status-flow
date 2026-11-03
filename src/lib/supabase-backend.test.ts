@@ -525,3 +525,36 @@ describe("Sprint 6E — Pre-Launch Integration, URL Canonicalization & Vercel Re
     expect(hasSpaRewrite).toBe(true);
   });
 });
+
+describe("Card Detail Page & Dual-ID Routing Fix", () => {
+  it("validates seed UUIDs and RFC UUIDs alike", async () => {
+    const { isValidUuid, toDbUuid } = await import("./supabase");
+    expect(isValidUuid("b1a2c3d4-0001-0001-0001-000000000001")).toBe(true);
+    expect(isValidUuid("11111111-2222-3333-4444-555555555501")).toBe(true);
+    expect(isValidUuid("b1")).toBe(false);
+    expect(toDbUuid("b1")).toBe("b1a2c3d4-0001-0001-0001-000000000001");
+    expect(toDbUuid("b1a2c3d4-0001-0001-0001-000000000001")).toBe("b1a2c3d4-0001-0001-0001-000000000001");
+  });
+
+  it("resolves business details by both UUID and mock ID", async () => {
+    const { businessService } = await import("@/services");
+    const bizByUuid = await businessService.getById("b1a2c3d4-0001-0001-0001-000000000001");
+    expect(bizByUuid).not.toBeNull();
+    expect(bizByUuid?.name).toBe("Kochi Bake House");
+
+    const bizByMockId = await businessService.getById("b1");
+    expect(bizByMockId).not.toBeNull();
+    expect(bizByMockId?.name).toBe("Kochi Bake House");
+  });
+
+  it("lists updates filtered by company UUID and mock ID", async () => {
+    const { updateService } = await import("@/services");
+    const updatesByUuid = await updateService.list("b1a2c3d4-0001-0001-0001-000000000001");
+    expect(updatesByUuid.length).toBeGreaterThan(0);
+    expect(updatesByUuid[0].companyName).toBe("Kochi Bake House");
+
+    const updatesByMockId = await updateService.list("b1");
+    expect(updatesByMockId.length).toBeGreaterThan(0);
+    expect(updatesByMockId[0].companyName).toBe("Kochi Bake House");
+  });
+});

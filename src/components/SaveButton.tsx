@@ -1,13 +1,14 @@
 import { Bookmark, BookmarkCheck, Bell, BellOff, BellRing } from "lucide-react";
 import { usePrefs, useWallet } from "@/hooks/use-data";
 import { prefsService, walletService } from "@/services";
+import { toDbUuid } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 
 export function SaveButton({ businessId, className }: { businessId: string; className?: string }) {
   const { savedIds, mutedIds } = useWallet();
-  const saved = savedIds.includes(businessId);
-  const muted = mutedIds.includes(businessId);
-  const alertsOn = !usePrefs().alertsOffIds.includes(businessId);
+  const saved = savedIds.some((id) => id === businessId || toDbUuid(id) === businessId || id === toDbUuid(businessId));
+  const muted = mutedIds.some((id) => id === businessId || toDbUuid(id) === businessId || id === toDbUuid(businessId));
+  const alertsOn = !usePrefs().alertsOffIds.some((id) => id === businessId || toDbUuid(id) === businessId || id === toDbUuid(businessId));
   return (
     <div className={cn("flex gap-2", className)}>
       <button

@@ -25,7 +25,29 @@ export const isProd = import.meta.env.PROD;
 export const isDev = !isProd;
 
 export function isValidUuid(id: string): boolean {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+  if (!id || typeof id !== "string") return false;
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id.trim());
+}
+
+export const MOCK_ID_TO_UUID: Record<string, string> = {
+  b1: "b1a2c3d4-0001-0001-0001-000000000001",
+  b2: "b1a2c3d4-0002-0002-0002-000000000002",
+  b3: "b1a2c3d4-0003-0003-0003-000000000003",
+  b4: "b1a2c3d4-0004-0004-0004-000000000004",
+  b5: "b1a2c3d4-0005-0005-0005-000000000005",
+  b6: "b1a2c3d4-0006-0006-0006-000000000006",
+  b7: "b1a2c3d4-0007-0007-0007-000000000007",
+  b8: "b1a2c3d4-0008-0008-0008-000000000008",
+  b9: "b1a2c3d4-0009-0009-0009-000000000009",
+};
+
+export const UUID_TO_MOCK_ID: Record<string, string> = Object.fromEntries(
+  Object.entries(MOCK_ID_TO_UUID).map(([mockId, uuid]) => [uuid, mockId])
+);
+
+export function toDbUuid(id: string): string {
+  if (isValidUuid(id)) return id;
+  return MOCK_ID_TO_UUID[id] || id;
 }
 
 // Singleton client instance or dummy client
