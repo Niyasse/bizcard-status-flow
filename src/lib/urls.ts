@@ -32,3 +32,4 @@ export function profileUrl(businessId: string): string {
 export function qrUrl(businessId: string): string {
   return `${getPublicBaseUrl()}/profile/${encodeURIComponent(businessId)}?src=qr`;
 }
+
