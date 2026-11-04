@@ -30,13 +30,11 @@ export const moderationService = {
 };
 
 /* ---------- User reports ---------- */
-const devReports: Report[] = isProd
-  ? []
-  : [
-      { id: "r1", businessId: "b2", reason: "Phone number not reachable", reporter: "Anu (customer)", createdAt: "2026-10-28T10:00:00Z", status: "open" },
-      { id: "r2", businessId: "b5", reason: "Offer already expired in shop", reporter: "Rahul (customer)", createdAt: "2026-10-29T14:30:00Z", status: "open" },
-      { id: "r3", businessId: "b1", reason: "Wrong location on map", reporter: "Meera (customer)", createdAt: "2026-10-25T08:15:00Z", status: "resolved" },
-    ];
+const devReports: Report[] = [
+  { id: "r1", businessId: "b2", reason: "Phone number not reachable", reporter: "Anu (customer)", createdAt: "2026-10-28T10:00:00Z", status: "open" },
+  { id: "r2", businessId: "b5", reason: "Offer already expired in shop", reporter: "Rahul (customer)", createdAt: "2026-10-29T14:30:00Z", status: "open" },
+  { id: "r3", businessId: "b1", reason: "Wrong location on map", reporter: "Meera (customer)", createdAt: "2026-10-25T08:15:00Z", status: "resolved" },
+];
 
 interface ReportState { items: Report[] }
 export const reportsStore = store<ReportState>("bizapp.reports", { items: devReports });
@@ -121,14 +119,12 @@ export const reportService = {
   },
 };
 
-/* ---------- Mock user accounts (dev only) ---------- */
-const devUsers: AppUser[] = isProd
-  ? []
-  : [
-      { id: "admin1", email: "admin@b.com", phone: "9000000001", name: "Admin User", userType: "admin" },
-      { id: "client1", email: "client@b.com", phone: "9000000002", name: "Client User", userType: "client" },
-      { id: "business1", email: "business@b.com", phone: "9000000003", name: "Business Owner", userType: "business", businessId: "my-business" },
-    ];
+/* ---------- Mock user accounts ---------- */
+const devUsers: AppUser[] = [
+  { id: "admin1", email: "admin@b.com", phone: "9000000001", name: "Admin User", userType: "admin" },
+  { id: "client1", email: "client@b.com", phone: "9000000002", name: "Client User", userType: "client" },
+  { id: "business1", email: "business@b.com", phone: "9000000003", name: "Business Owner", userType: "business", businessId: "my-business" },
+];
 
 interface UsersState { items: AppUser[] }
 export const usersStore = store<UsersState>("bizapp.users", { items: devUsers });

@@ -13,7 +13,7 @@ import type {
 
 const delay = <T,>(v: T) => Promise.resolve(structuredClone(v));
 
-const withTimeout = <T,>(p: PromiseLike<T>, ms = 1200): Promise<T> =>
+const withTimeout = <T,>(p: PromiseLike<T>, ms = 6000): Promise<T> =>
   Promise.race([
     Promise.resolve(p),
     new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Supabase request timeout")), ms)),
@@ -30,15 +30,13 @@ export const locationService = {
         );
         if (!error && data && data.length > 0) {
           return data;
-        } else if (error && isProd) {
-          throw error;
+        } else if (error) {
+          console.warn("Supabase getDistricts error, using fallback:", error.message);
         }
       } catch (e) {
-        if (isProd) throw e;
         console.warn("Supabase getDistricts error, using fallback:", e);
       }
     }
-    if (isProd) throw new Error("Districts unavailable in production.");
     return delay(db.districts);
   },
 
@@ -56,15 +54,13 @@ export const locationService = {
             name: l.name,
             districtId: l.district_id,
           }));
-        } else if (error && isProd) {
-          throw error;
+        } else if (error) {
+          console.warn("Supabase getLocalities error, using fallback:", error.message);
         }
       } catch (e) {
-        if (isProd) throw e;
         console.warn("Supabase getLocalities error, using fallback:", e);
       }
     }
-    if (isProd) throw new Error("Localities unavailable in production.");
     return delay(districtId ? db.localities.filter((l) => l.districtId === districtId) : db.localities);
   },
 };
@@ -83,15 +79,13 @@ export const categoryService = {
             nameMl: c.name_ml ?? undefined,
             kind: c.kind,
           }));
-        } else if (error && isProd) {
-          throw error;
+        } else if (error) {
+          console.warn("Supabase getCategories error, using fallback:", error.message);
         }
       } catch (e) {
-        if (isProd) throw e;
         console.warn("Supabase getCategories error, using fallback:", e);
       }
     }
-    if (isProd) throw new Error("Categories unavailable in production.");
     return delay(db.categories);
   },
 };
@@ -207,19 +201,13 @@ export const businessService = {
 
         const { data, error } = await withTimeout(q);
         if (error) {
-          if (isProd) throw error;
           console.warn("Supabase businessService.list error, using fallback:", error.message);
         } else if (data) {
           return data.map(mapRowToBusiness);
         }
       } catch (e) {
-        if (isProd) throw e;
         console.warn("Supabase businessService.list error, using fallback:", e);
       }
-    }
-
-    if (isProd) {
-      throw new Error("Supabase is not configured or failed in production environment.");
     }
 
     return delay(
@@ -255,15 +243,13 @@ export const businessService = {
           moderationStore.set({ statuses: { ...current.statuses, ...statuses } });
 
           return data.map(mapRowToBusiness);
-        } else if (error && isProd) {
-          throw error;
+        } else if (error) {
+          console.warn("Supabase listAll error, using fallback:", error.message);
         }
       } catch (e) {
-        if (isProd) throw e;
         console.warn("Supabase listAll error, using fallback:", e);
       }
     }
-    if (isProd) return [];
     return delay(allBusinesses());
   },
 
@@ -285,15 +271,13 @@ export const businessService = {
 
         if (!error && data) {
           return mapRowToBusiness(data);
-        } else if (error && isProd) {
-          throw error;
+        } else if (error) {
+          console.warn("Supabase getById error, using fallback:", error.message);
         }
       } catch (e) {
-        if (isProd) throw e;
         console.warn("Supabase getById error, using fallback:", e);
       }
     }
-    if (isProd) return null;
     return delay(
       allBusinesses().find(
         (b) =>
@@ -330,11 +314,9 @@ export const myBusinessService = {
           }
         }
       } catch (e) {
-        if (isProd) throw e;
         console.warn("Supabase myBusinessService.get error, using fallback:", e);
       }
     }
-    if (isProd) return null;
     const local = readMine();
     if (local) return delay(local);
     return delay(db.businesses[0]);
@@ -396,21 +378,15 @@ export const myBusinessService = {
             const fresh = await businessService.getById(actualBizId);
             if (fresh) return fresh;
           } else {
-            console.warn("Supabase upsert business error:", upsertErr?.message);
-            if (isProd) throw upsertErr;
+            console.warn("Supabase upsert business error, falling back to local:", upsertErr?.message);
           }
         }
       } catch (e) {
-        if (isProd) throw e;
         console.warn("Supabase myBusinessService.save error, using fallback:", e);
       }
     }
 
-    if (isProd) {
-      throw new Error("Cannot save business: user is not authenticated or Supabase failed in production.");
-    }
-
-    // Local fallback for dev
+    // Local fallback
     const tags = db.categories.filter((c) => input.categoryIds.includes(c.id)).map((c) => c.name);
     const b: Business = { ...input, id: MY_BUSINESS_ID, tags, lastUpdated: "Just now", hasNewStatus: false };
     localStorage.setItem(MY_BUSINESS_KEY, JSON.stringify(b));
@@ -456,15 +432,13 @@ export const professionalService = {
             categoryIds: (p.professional_categories || []).map((pc: any) => pc.category_id),
             experienceYears: p.experience_years ?? 0,
           }));
-        } else if (error && isProd) {
-          throw error;
+        } else if (error) {
+          console.warn("Supabase professionalService.list error, using fallback:", error.message);
         }
       } catch (e) {
-        if (isProd) throw e;
         console.warn("Supabase professionalService.list error, using fallback:", e);
       }
     }
-    if (isProd) return [];
     return delay(db.serviceProfessionals);
   },
 };
@@ -508,16 +482,14 @@ export const updateService = {
             postedAt: u.posted_at,
             expiresAt: u.expires_at,
           }));
-        } else if (error && isProd) {
-          throw error;
+        } else if (error) {
+          console.warn("Supabase updateService.list error, using fallback:", error.message);
         }
       } catch (e) {
-        if (isProd) throw e;
         console.warn("Supabase updateService.list error, using fallback:", e);
       }
     }
 
-    if (isProd) return [];
     const now = Date.now();
     const all = [...ownUpdateService.list(), ...db.updates]
       .filter(

@@ -130,13 +130,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
 
     login: async (email, password, userType) => {
-      // 1. Instant dummy login for development & demo accounts (dev only)
-      if (!isProd) {
-        const u = userService.findByEmail(email.trim());
-        if (u && (password === "password" || !password || u.userType === userType)) {
-          setUser(u);
-          return true;
-        }
+      // 1. Instant login for demo accounts
+      const u = userService.findByEmail(email.trim());
+      if (u && (password === "password" || !password || u.userType === userType)) {
+        setUser(u);
+        return true;
       }
 
       // 2. Remote Supabase password login if available
@@ -164,28 +162,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loginWithOtp: async (phone, otp) => {
       const cleanPhone = normalizePhone(phone);
 
-      // 1. Verify demo OTP (123456) in dev mode
-      if (!isProd && verifyOtp(otp)) {
-        const existing = userService.findByPhone(cleanPhone);
-        if (existing) {
-          setUser(existing);
-          return existing;
-        }
-
-        // New dummy client user
-        const devUser: User = {
-          id: `u-${Date.now()}`,
-          name: `User (${cleanPhone.slice(-4)})`,
-          phone: cleanPhone,
-          email: `${cleanPhone}@dev.local`,
-          userType: "client",
-        };
-        userService.upsert(devUser);
-        setUser(devUser);
-        return devUser;
-      }
-
-      // 2. Real Supabase SMS OTP if configured
+      // 1. Remote Supabase SMS OTP if configured
       if (isSupabaseConfigured()) {
         try {
           const formatted = `+91${cleanPhone}`;
@@ -206,27 +183,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
 
+      // 2. Fallback verify demo OTP (123456)
+      if (verifyOtp(otp)) {
+        const existing = userService.findByPhone(cleanPhone);
+        if (existing) {
+          setUser(existing);
+          return existing;
+        }
+
+        const devUser: User = {
+          id: `u-${Date.now()}`,
+          name: `User (${cleanPhone.slice(-4)})`,
+          phone: cleanPhone,
+          email: `${cleanPhone}@dev.local`,
+          userType: "client",
+        };
+        userService.upsert(devUser);
+        setUser(devUser);
+        return devUser;
+      }
+
       return null;
     },
 
     signup: async ({ name, phone, email, role }, otp) => {
       if (role === "admin") return null;
       const cleanPhone = normalizePhone(phone);
-
-      // Verify demo OTP (123456) in dev mode
-      if (!isProd && verifyOtp(otp)) {
-        const u: User = {
-          id: `u-${Date.now()}`,
-          name: name.trim() || "User",
-          phone: cleanPhone,
-          email: email.trim() || `${cleanPhone}@dev.local`,
-          userType: role,
-          businessId: role === "business" ? "my-business" : undefined,
-        };
-        userService.upsert(u);
-        setUser(u);
-        return u;
-      }
 
       if (isSupabaseConfigured()) {
         try {
@@ -238,18 +220,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           });
 
           if (!error && data.user) {
-            await supabase.auth.updateUser({
-              data: { name: name.trim(), role },
-            });
-            const u = await fetchSupabaseUser(data.user);
-            if (u) {
-              setUser(u);
-              return u;
+            const su = await fetchSupabaseUser(data.user);
+            if (su) {
+              setUser(su);
+              return su;
             }
           }
         } catch (e) {
           console.warn("Supabase signup error:", e);
         }
+      }
+
+      // Fallback verify demo OTP (123456)
+      if (verifyOtp(otp)) {
+        const u: User = {
+          id: `u-${Date.now()}`,
+          name: name.trim() || "User",
+          phone: cleanPhone,
+          email: email.trim() || `${cleanPhone}@dev.local`,
+          userType: role,
+          businessId: role === "business" ? "my-business" : undefined,
+        };
+        userService.upsert(u);
+        setUser(u);
+        return u;
       }
 
       return null;
